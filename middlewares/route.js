@@ -3,6 +3,7 @@ const petCategoryRoutes = require('../routes/petCategoryRoutes');
 const petRoutes = require('../routes/petRoutes');
 const productCategoryRoutes = require('../routes/productCategoryRoutes');
 const productRoutes = require('../routes/productRoutes');
+const cartRoutes = require('../routes/cartRoutes');
 
 module.exports = (app) => {
     app.use('/api/user', userRoutes);
@@ -10,4 +11,5 @@ module.exports = (app) => {
     app.use('/api/pet', petRoutes);
     app.use('/api/product/category', productCategoryRoutes);
     app.use('/api/product', productRoutes);
+    app.use('/api/cart', cartRoutes);
 }
