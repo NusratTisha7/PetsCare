@@ -2,14 +2,14 @@ const conn = require('../config/db')
 
 module.exports.addNewProduct = async (req, res) => {
     try {
-        let { name, description, price, details, brand, productCategory } = req.body
-        let sql = "CREATE TABLE IF NOT EXISTS product (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), description VARCHAR(255), price int, details VARCHAR(255), productCategory int, FOREIGN KEY (productCategory) REFERENCES product_category(id), brand VARCHAR(255), ProductImage VARCHAR(255))";
+        let { name, description, price, details, brandID, productCategory } = req.body
+        let sql = "CREATE TABLE IF NOT EXISTS product (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), description VARCHAR(255), price int, details VARCHAR(255), productCategory int, FOREIGN KEY (productCategory) REFERENCES product_category(id), brandID int, ProductImage VARCHAR(255),FOREIGN KEY (brandID) REFERENCES brand(id))";
         conn.query(sql, function (err, result) {
             if (err) res.status(400).send({ message: 'Something failed!' });
-            let sql = "INSERT INTO product (name, description, price, details,productCategory,brand,ProductImage) VALUES ?";
-            let values = [[name, description, price, details, productCategory, brand, `${req.file.filename}`]]
+            let sql = "INSERT INTO product (name, description, price, details,productCategory,brandID,ProductImage) VALUES ?";
+            let values = [[name, description, price, details, productCategory, brandID, `${req.file.filename}`]]
             conn.query(sql, [values], function (err, result) {
-                if (err) return res.status(400).send(err);
+                if (err) return res.status(400).send({ message: 'Something failed!' });
                 return res.status(200).send({ message: 'New product added successfully' })
             })
         })
