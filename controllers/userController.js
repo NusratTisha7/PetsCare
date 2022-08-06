@@ -19,7 +19,7 @@ module.exports.signIn = async (req, res) => {
         if (result) {
             const chekPass = await bcrypt.compare(password, result.password);
             if (chekPass) {
-                const jsontoken = sign({ result: result }, process.env.JWT_SECRET_KEY, {
+                const jsontoken = sign({ result }, process.env.JWT_SECRET_KEY, {
                     expiresIn: "1h"
                 });
                 return res.status(200).send({
@@ -38,10 +38,11 @@ module.exports.signIn = async (req, res) => {
 
 module.exports.signUp = async (req, res) => {
     let { email, password, phone, address } = req.body
+    let role = 'customer'
     const salt = await bcrypt.genSalt(10);
     password = await bcrypt.hash(password, salt);
 
-    let sql = "CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, email VARCHAR(255), password VARCHAR(255), phone VARCHAR(255), address VARCHAR(255))";
+    let sql = "CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, email VARCHAR(255), password VARCHAR(255), phone VARCHAR(255), address VARCHAR(255),role VARCHAR(255))";
     conn.query(sql, function (err, result) {
         if (err) return res.status(400).send({ message: 'Something failed!' });
         findUser(email, async (err, result) => {
@@ -50,11 +51,37 @@ module.exports.signUp = async (req, res) => {
                 return res.status(200).send({ message: 'Email already exists!' })
             }
             else {
-                let sql = "INSERT INTO users (email, password, phone, address) VALUES ?";
-                let values = [[email, password, phone, address]]
+                let sql = "INSERT INTO users (email, password, phone, address, role) VALUES ?";
+                let values = [[email, password, phone, address, role]]
                 conn.query(sql, [values], function (err, result) {
                     if (err) throw err;
                     return res.status(200).send({ message: 'User Created Successfully' })
+                })
+            }
+        })
+    });
+}
+
+module.exports.createAdmin = async (req, res) => {
+    let { email, password, phone, address } = req.body
+    let role = 'admin'
+    const salt = await bcrypt.genSalt(10);
+    password = await bcrypt.hash(password, salt);
+
+    let sql = "CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, email VARCHAR(255), password VARCHAR(255), phone VARCHAR(255), address VARCHAR(255),role VARCHAR(255))";
+    conn.query(sql, function (err, result) {
+        if (err) return res.status(400).send({ message: 'Something failed!' });
+        findUser(email, async (err, result) => {
+            if (err) return res.status(400).send({ message: 'Something failed!' });
+            if (result) {
+                return res.status(200).send({ message: 'Email already exists!' })
+            }
+            else {
+                let sql = "INSERT INTO users (email, password, phone, address, role) VALUES ?";
+                let values = [[email, password, phone, address, role]]
+                conn.query(sql, [values], function (err, result) {
+                    if (err) throw err;
+                    return res.status(200).send({ message: 'Admin Created Successfully' })
                 })
             }
         })

@@ -1,27 +1,28 @@
 const router = require('express').Router();
-const { addNewProduct, getAllProducts, getOneProduct, sortByCategory, sortProduct, searchProduct ,filterProduct} = require('../controllers/productController')
+const { addNewProduct, getAllProducts, getOneProduct, sortByCategory, sortProduct, searchProduct, filterProduct } = require('../controllers/productController')
 const upload = require("../middlewares/multer");
 const authorize = require('../middlewares/authorize');
+const verifyAdmin = require('../middlewares/verifyAdmin');
 
 router.route('/create')
-    .post([authorize], upload.single("photo"), addNewProduct)
+    .post([authorize, verifyAdmin], upload.single("photo"), addNewProduct)
 
 router.route('/getAll')
-    .get([authorize], getAllProducts)
+    .get(getAllProducts)
 
 router.route('/getOne/:id')
-    .get([authorize], getOneProduct)
+    .get(getOneProduct)
 
 router.route('/sort_by_category/:id')
-    .get([authorize], sortByCategory)
+    .get(sortByCategory)
 
 router.route('/sort_product')
-    .get([authorize], sortProduct)
+    .get(sortProduct)
 
 router.route('/search_product')
-    .get([authorize], searchProduct)
+    .get(searchProduct)
 
 router.route('/filter_product')
-    .get([authorize], filterProduct)
+    .get(filterProduct)
 
 module.exports = router;
