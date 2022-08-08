@@ -42,3 +42,36 @@ module.exports.getOnePet = async (req, res) => {
         return res.status(400).send(err)
     }
 }
+
+module.exports.editPet = async (req, res) => {
+    try {
+        let id = req.params.id
+        if(req.body.types){
+            return res.status(400).send({ message: 'Pet type can not be edited!' });
+        }
+        let updateData = req.body
+        if(req.file){
+            updateData.PetImage = req.file.filename
+        }
+        let sql = "UPDATE pet SET ? WHERE id= ?";
+        conn.query(sql, [updateData, id], function (err, result) {
+            if (err) return res.status(400).send({ message: 'Something failed!' });
+            return res.status(200).send({ message: 'Pet updated successfully' })
+        })
+    } catch (err) {
+        return res.status(400).send(err)
+    }
+}
+
+module.exports.deletePet = async (req, res) => {
+    try {
+        let id = req.params.id
+        let sql = "DELETE FROM pet WHERE id = ?"
+        conn.query(sql, [id], function (err, result) {
+            if (err) return res.status(400).send({ message: 'Something failed!' });
+            return res.status(200).send({ message: 'Successfully deleted' })
+        })
+    } catch (err) {
+        return res.status(400).send(err)
+    }
+}

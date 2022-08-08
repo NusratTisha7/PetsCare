@@ -1,4 +1,5 @@
 const conn = require('../config/db')
+const _ = require('lodash');
 
 module.exports.addNewOffer = async (req, res) => {
     try {
@@ -18,7 +19,7 @@ module.exports.addNewOffer = async (req, res) => {
             let values = [[title, description, productID, categoryID, `${req.file.filename}`]]
             conn.query(sql, [values], function (err, result) {
                 if (err) return res.status(400).send({ message: 'Something failed!' });
-                return res.status(200).send({ message: 'New product added successfully' })
+                return res.status(200).send({ message: 'Offer added successfully' })
             })
         })
     } catch (err) {
@@ -27,7 +28,20 @@ module.exports.addNewOffer = async (req, res) => {
 }
 
 module.exports.editOffer = async (req, res) => {
-
+    try {
+        let productId = req.params.id
+        let updateData = req.body
+        if(req.file){
+            updateData.image = req.file.filename
+        }
+        let sql = "UPDATE latest_offer SET ? WHERE id= ?";
+        conn.query(sql, [updateData,productId], function (err, result) {
+            if (err) return res.status(400).send({ message: 'Something failed!' });
+            return res.status(200).send({ message: 'Offer updated successfully' })
+        })
+    } catch (err) {
+        return res.status(400).send(err)
+    }
 }
 
 module.exports.getAllOffer = async (req, res) => {

@@ -43,6 +43,39 @@ module.exports.getOneProduct = async (req, res) => {
     }
 }
 
+module.exports.editProduct = async (req, res) => {
+    try {
+        let id = req.params.id
+        if(req.body.productCategory || req.body.brandID){
+            return res.status(400).send({ message: `can not be edited foreign key!` });
+        }
+        let updateData = req.body
+        if(req.file){
+            updateData.ProductImage = req.file.filename
+        }
+        let sql = "UPDATE product SET ? WHERE id= ?";
+        conn.query(sql, [updateData, id], function (err, result) {
+            if (err) return res.status(400).send({ message: 'Something failed!' });
+            return res.status(200).send({ message: 'Product updated successfully' })
+        })
+    } catch (err) {
+        return res.status(400).send(err)
+    }
+}
+
+module.exports.deleteProduct = async (req, res) => {
+    try {
+        let id = req.params.id
+        let sql = "DELETE FROM product WHERE id = ?"
+        conn.query(sql, [id], function (err, result) {
+            if (err) return res.status(400).send({ message: 'Something failed!' });
+            return res.status(200).send({ message: 'Successfully deleted' })
+        })
+    } catch (err) {
+        return res.status(400).send(err)
+    }
+}
+
 module.exports.sortByCategory = async (req, res) => {
     try {
         let productId = req.params.id
@@ -100,15 +133,7 @@ module.exports.filterProduct = async (req, res) => {
         let sql;
         if (req.body.brand) {
             let brandList = req.body.brand
-            let str = '';
-            for (let i = 0; i < brandList.length; i++) {
-                if (i === brandList.length - 1) {
-                    str = str + `'${brandList[i]}'`
-                } else {
-                    str = str + `'${brandList[i]}',`
-                }
-            }
-            sql = "SELECT * from product where `brand` in  (" + str + ") AND price BETWEEN " + req.body.start + " AND " + req.body.end + ""
+            sql = "SELECT * from product where `brandID` in  (" + brandList + ") AND price BETWEEN " + req.body.start + " AND " + req.body.end + ""
         } else {
             sql = "SELECT * from product where price BETWEEN " + req.body.start + " AND " + req.body.end + ""
         }

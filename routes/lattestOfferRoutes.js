@@ -13,11 +13,11 @@ const upload = require("../middlewares/multer");
 
 router.route('/')
     .post([authorize, verifyAdmin], upload.single("photo"), addNewOffer)
-    .put([authorize, verifyAdmin], editOffer)
     .get(getAllOffer)
 
 router.route('/:id')
-    .delete([authorize, verifyAdmin], deleteOffer);
+    .delete([authorize, verifyAdmin], deleteOffer)
+    .put([authorize, verifyAdmin], upload.single("photo"),editOffer)
 
 router.route('/product/:id')
     .get(getOneOfferProduct)

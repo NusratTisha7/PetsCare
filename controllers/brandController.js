@@ -29,3 +29,30 @@ module.exports.getAllBrandItem = async (req, res) => {
         return res.status(400).send(err)
     }
 }
+
+module.exports.editBrand = async (req, res) => {
+    try {
+        let brandId = req.params.id
+        let updateData = req.body
+        let sql = "UPDATE brand SET ? WHERE id= ?";
+        conn.query(sql, [updateData, brandId], function (err, result) {
+            if (err) return res.status(400).send({ message: 'Something failed!' });
+            return res.status(200).send({ message: 'Brand updated successfully' })
+        })
+    } catch (err) {
+        return res.status(400).send(err)
+    }
+}
+
+module.exports.deleteBrand = async (req, res) => {
+    try {
+        let brandId = req.params.id
+        let sql = "DELETE FROM brand WHERE id = ?"
+        conn.query(sql, [brandId], function (err, result) {
+            if (err) return res.status(400).send({ message: 'Something failed!' });
+            return res.status(200).send({ message: 'Successfully deleted' })
+        })
+    } catch (err) {
+        return res.status(400).send(err)
+    }
+}

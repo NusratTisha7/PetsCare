@@ -1,16 +1,17 @@
 const router = require('express').Router();
-const { addNewPet, getAllPets, getOnePet } = require('../controllers/petController')
+const { addNewPet, getAllPets, getOnePet,editPet,deletePet } = require('../controllers/petController')
 const upload = require("../middlewares/multer");
 const authorize = require('../middlewares/authorize');
 const verifyAdmin = require('../middlewares/verifyAdmin');
 
-router.route('/create')
+router.route('/')
     .post([authorize, verifyAdmin], upload.single("photo"), addNewPet)
-
-router.route('/getAll')
     .get(getAllPets)
 
-router.route('/getOne/:id')
+
+router.route('/:id')
     .get(getOnePet)
+    .put([authorize, verifyAdmin], upload.single("photo"),editPet)
+    .delete([authorize, verifyAdmin], deletePet)
 
 module.exports = router;
