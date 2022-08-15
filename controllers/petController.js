@@ -1,18 +1,22 @@
-const conn = require('../config/db')
+const query = require('../config/db')
 
 module.exports.addNewPet = async (req, res) => {
     try {
+        let createdBy = req.user.result.id
         let { name, types, breed, birthDate, gender, weight, description } = req.body
-        let sql = "CREATE TABLE IF NOT EXISTS pet (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), types int, FOREIGN KEY (types) REFERENCES pet_category(id), breed VARCHAR(255), birthDate VARCHAR(255),gender VARCHAR(255),weight VARCHAR(255),description VARCHAR(255), PetImage VARCHAR(255))";
-        conn.query(sql, function (err, result) {
-            if (err) return res.status(400).send({ message: 'Something failed!' });
-            let sql = "INSERT INTO pet (name,types,breed,birthDate,gender,weight,description,PetImage) VALUES ?";
-            let values = [[name, types, breed, birthDate, gender, weight, description, `${req.file.filename}`]]
-            conn.query(sql, [values], function (err, result) {
-                if (err) return res.status(400).send({ message: 'Something failed!' });
+        let sql = "CREATE TABLE IF NOT EXISTS pet (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), petCategoryID int, FOREIGN KEY (petCategoryID) REFERENCES pet_category(id), breed VARCHAR(255), birthDate VARCHAR(255),gender VARCHAR(255),weight VARCHAR(255),description VARCHAR(255), petImage VARCHAR(255),createdBy int ,FOREIGN KEY (createdBy) REFERENCES user(id))";
+        await query(sql).then(async response => {
+            let sql = "INSERT INTO pet (name,petCategoryID,breed,birthDate,gender,weight,description,petImage,createdBy) VALUES ?";
+            let values = [[name, types, breed, birthDate, gender, weight, description, `${req.file.filename}`, createdBy]]
+            await query(sql, [values]).then(response => {
                 return res.status(200).send({ message: 'New pet added successfully' })
+            }).catch(err => {
+                return res.status(400).send({ message: 'Something failed!' });
             })
+        }).catch(err => {
+            return res.status(400).send({ message: 'Something failed!' });
         })
+
     } catch (err) {
         return res.status(400).send(err)
     }
@@ -21,9 +25,10 @@ module.exports.addNewPet = async (req, res) => {
 module.exports.getAllPets = async (req, res) => {
     try {
         let sql = "SELECT * FROM pet";
-        conn.query(sql, function (err, result) {
-            if (err) return res.status(400).send({ message: 'Something failed!' });
-            return res.status(200).send(result)
+        await query(sql).then(response => {
+            return res.status(200).send(response)
+        }).catch(err => {
+            return res.status(400).send({ message: 'Something failed!' });
         })
     } catch (err) {
         return res.status(400).send(err)
@@ -33,11 +38,13 @@ module.exports.getAllPets = async (req, res) => {
 module.exports.getOnePet = async (req, res) => {
     try {
         let petId = req.params.id
-        let sql = "SELECT * FROM pet where id = ?";
-        conn.query(sql, [petId], function (err, result) {
-            if (err) return res.status(400).send({ message: 'Something failed!' });
-            return res.status(200).send(result)
+        let sql = "SELECT * FROM pet where id = ?"
+        await query(sql, [petId]).then(response => {
+            return res.status(200).send(response)
+        }).catch(err => {
+            return res.status(400).send({ message: 'Something failed!' });
         })
+
     } catch (err) {
         return res.status(400).send(err)
     }
@@ -46,17 +53,18 @@ module.exports.getOnePet = async (req, res) => {
 module.exports.editPet = async (req, res) => {
     try {
         let id = req.params.id
-        if(req.body.types){
+        if (req.body.petCategoryID) {
             return res.status(400).send({ message: 'Pet type can not be edited!' });
         }
         let updateData = req.body
-        if(req.file){
+        if (req.file) {
             updateData.PetImage = req.file.filename
         }
         let sql = "UPDATE pet SET ? WHERE id= ?";
-        conn.query(sql, [updateData, id], function (err, result) {
-            if (err) return res.status(400).send({ message: 'Something failed!' });
+        await query(sql, [updateData, id]).then(response => {
             return res.status(200).send({ message: 'Pet updated successfully' })
+        }).catch(err => {
+            return res.status(400).send({ message: 'Something failed!' });
         })
     } catch (err) {
         return res.status(400).send(err)
@@ -67,7 +75,7 @@ module.exports.deletePet = async (req, res) => {
     try {
         let id = req.params.id
         let sql = "DELETE FROM pet WHERE id = ?"
-        conn.query(sql, [id], function (err, result) {
+        await query(sql, [id], function (err, result) {
             if (err) return res.status(400).send({ message: 'Something failed!' });
             return res.status(200).send({ message: 'Successfully deleted' })
         })

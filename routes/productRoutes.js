@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { addNewProduct, getAllProducts, getOneProduct, sortByCategory, sortProduct, searchProduct, filterProduct,editProduct,deleteProduct } = require('../controllers/productController')
+const { addNewProduct, getAllProducts, getOneProduct, sortByCategory, sortProduct, searchProduct, filterProduct, editProduct, deleteProduct } = require('../controllers/productController')
 const upload = require("../middlewares/multer");
 const authorize = require('../middlewares/authorize');
 const verifyAdmin = require('../middlewares/verifyAdmin');
@@ -10,7 +10,7 @@ router.route('/')
 
 router.route('/:id')
     .get(getOneProduct)
-    .put([authorize, verifyAdmin], upload.single("photo"),editProduct)
+    .put([authorize, verifyAdmin], upload.single("photo"), editProduct)
     .delete([authorize, verifyAdmin], deleteProduct)
 
 router.route('/sort_by_category/:id')

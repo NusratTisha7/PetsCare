@@ -17,7 +17,7 @@ router.route('/')
 
 router.route('/:id')
     .delete([authorize, verifyAdmin], deleteOffer)
-    .put([authorize, verifyAdmin], upload.single("photo"),editOffer)
+    .put([authorize, verifyAdmin], upload.single("photo"), editOffer)
 
 router.route('/product/:id')
     .get(getOneOfferProduct)

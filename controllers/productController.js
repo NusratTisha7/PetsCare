@@ -1,17 +1,21 @@
-const conn = require('../config/db')
+const query = require('../config/db')
 
 module.exports.addNewProduct = async (req, res) => {
     try {
+        let createdBy = req.user.result.id
         let { name, description, price, details, brandID, productCategory } = req.body
-        let sql = "CREATE TABLE IF NOT EXISTS product (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), description VARCHAR(255), price int, details VARCHAR(255), productCategory int, FOREIGN KEY (productCategory) REFERENCES product_category(id), brandID int, ProductImage VARCHAR(255),FOREIGN KEY (brandID) REFERENCES brand(id))";
-        conn.query(sql, function (err, result) {
-            if (err) res.status(400).send({ message: 'Something failed!' });
-            let sql = "INSERT INTO product (name, description, price, details,productCategory,brandID,ProductImage) VALUES ?";
-            let values = [[name, description, price, details, productCategory, brandID, `${req.file.filename}`]]
-            conn.query(sql, [values], function (err, result) {
-                if (err) return res.status(400).send({ message: 'Something failed!' });
+        let sql = "CREATE TABLE IF NOT EXISTS product (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), description VARCHAR(255), price int, details VARCHAR(255), productCategory int, FOREIGN KEY (productCategory) REFERENCES product_category(id), brandID int, ProductImage VARCHAR(255),FOREIGN KEY (brandID) REFERENCES brand(id),createdBy int ,FOREIGN KEY (createdBy) REFERENCES user(id))";
+        await query(sql).then(async response => {
+            let sql = "INSERT INTO product (name, description, price, details,productCategory,brandID,ProductImage,createdBy) VALUES ?";
+            let values = [[name, description, price, details, productCategory, brandID, `${req.file.filename}`, createdBy]]
+            await query(sql, [values]).then(response => {
                 return res.status(200).send({ message: 'New product added successfully' })
+            }).catch(err => {
+                return res.status(400).send({ message: 'Something failed!' });
             })
+
+        }).catch(err => {
+            return res.status(400).send({ message: 'Something failed!' });
         })
     } catch (err) {
         return res.status(400).send(err)
@@ -21,9 +25,10 @@ module.exports.addNewProduct = async (req, res) => {
 module.exports.getAllProducts = async (req, res) => {
     try {
         let sql = "SELECT * FROM product";
-        conn.query(sql, function (err, result) {
-            if (err) return res.status(400).send({ message: 'Something failed!' });
-            return res.status(200).send(result)
+        await query(sql).then(response => {
+            return res.status(200).send(response)
+        }).catch(err => {
+            return res.status(400).send({ message: 'Something failed!' });
         })
     } catch (err) {
         return res.status(400).send(err)
@@ -34,10 +39,12 @@ module.exports.getOneProduct = async (req, res) => {
     try {
         let productId = req.params.id
         let sql = "SELECT * FROM product WHERE id = ?";
-        conn.query(sql, [productId], function (err, result) {
-            if (err) return res.status(400).send({ message: 'Something failed!' });
-            return res.status(200).send(result)
+        await query(sql, [productId]).then(response => {
+            return res.status(200).send(response)
+        }).catch(err => {
+            return res.status(400).send({ message: 'Something failed!' });
         })
+
     } catch (err) {
         return res.status(400).send(err)
     }
@@ -46,18 +53,20 @@ module.exports.getOneProduct = async (req, res) => {
 module.exports.editProduct = async (req, res) => {
     try {
         let id = req.params.id
-        if(req.body.productCategory || req.body.brandID){
+        if (req.body.productCategory || req.body.brandID) {
             return res.status(400).send({ message: `can not be edited foreign key!` });
         }
         let updateData = req.body
-        if(req.file){
+        if (req.file) {
             updateData.ProductImage = req.file.filename
         }
         let sql = "UPDATE product SET ? WHERE id= ?";
-        conn.query(sql, [updateData, id], function (err, result) {
-            if (err) return res.status(400).send({ message: 'Something failed!' });
+        await query(sql, [updateData, id]).then(response => {
             return res.status(200).send({ message: 'Product updated successfully' })
+        }).catch(err => {
+            return res.status(400).send({ message: 'Something failed!' });
         })
+
     } catch (err) {
         return res.status(400).send(err)
     }
@@ -67,10 +76,12 @@ module.exports.deleteProduct = async (req, res) => {
     try {
         let id = req.params.id
         let sql = "DELETE FROM product WHERE id = ?"
-        conn.query(sql, [id], function (err, result) {
-            if (err) return res.status(400).send({ message: 'Something failed!' });
+        await query(sql, [id]).then(response => {
             return res.status(200).send({ message: 'Successfully deleted' })
+        }).catch(err => {
+            return res.status(400).send({ message: 'Something failed!' });
         })
+
     } catch (err) {
         return res.status(400).send(err)
     }
@@ -80,10 +91,12 @@ module.exports.sortByCategory = async (req, res) => {
     try {
         let productId = req.params.id
         let sql = "SELECT * FROM product WHERE productCategory = ?";
-        conn.query(sql, [productId], function (err, result) {
-            if (err) return res.status(400).send({ message: 'Something failed!' });
-            return res.status(200).send(result)
+        await query(sql, [productId]).then(response => {
+            return res.status(200).send(response)
+        }).catch(err => {
+            return res.status(400).send({ message: 'Something failed!' });
         })
+
     } catch (err) {
         return res.status(400).send(err)
     }
@@ -106,10 +119,12 @@ module.exports.sortProduct = async (req, res) => {
                 sql = "SELECT * FROM product ORDER BY price DESC";
                 break;
         }
-        conn.query(sql, function (err, result) {
-            if (err) return res.status(400).send({ message: 'Something failed!' });
-            return res.status(200).send(result)
+        await query(sql).then(response => {
+            return res.status(200).send(response)
+        }).catch(err => {
+            return res.status(400).send({ message: 'Something failed!' });
         })
+
     } catch (err) {
         return res.status(400).send(err)
     }
@@ -119,10 +134,12 @@ module.exports.searchProduct = async (req, res) => {
     try {
         let serachTerm = req.body.serachTerm;
         let sql = "SELECT * FROM product WHERE name LIKE '%" + serachTerm + "%'"
-        conn.query(sql, function (err, result) {
-            if (err) return res.status(400).send({ message: 'Something failed!' });
-            return res.status(200).send(result)
+        await query(sql).then(response => {
+            return res.status(200).send(response)
+        }).catch(err => {
+            return res.status(400).send({ message: 'Something failed!' });
         })
+
     } catch (err) {
         return res.status(400).send(err)
     }
@@ -137,10 +154,12 @@ module.exports.filterProduct = async (req, res) => {
         } else {
             sql = "SELECT * from product where price BETWEEN " + req.body.start + " AND " + req.body.end + ""
         }
-        conn.query(sql, function (err, result) {
-            if (err) return res.status(400).send({ message: 'Something failed!' });
-            return res.status(200).send(result)
+        await query(sql).then(response => {
+            return res.status(200).send(response)
+        }).catch(err => {
+            return res.status(400).send({ message: 'Something failed!' });
         })
+
     } catch (err) {
         return res.status(400).send(err)
     }

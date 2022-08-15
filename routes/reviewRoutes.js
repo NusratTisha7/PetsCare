@@ -1,16 +1,12 @@
 const router = require('express').Router();
-const { addProductReview, getProductReviews, addPetReview, getPetReviews } = require('../controllers/reviewController')
+const { addReview, getReviews } = require('../controllers/reviewController')
 const authorize = require('../middlewares/authorize');
 
+
 router.route('/')
-    .post([authorize], addProductReview)
-
-router.route('/product/:id')
-    .get(getProductReviews)
-
-
-router.route('/pet/:id')
-    .get(getPetReviews)
-
+    .post([authorize], addReview)
+    .get(getReviews)
 
 module.exports = router;
+
+

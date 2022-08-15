@@ -1,8 +1,8 @@
 const router = require('express').Router();
-const { signIn, signUp, createAdmin } = require('../controllers/userController')
+const { signIn, createCustomer, createAdmin, resendOTP, verifyUser } = require('../controllers/userController')
 
 router.route('/signup')
-    .post(signUp)
+    .post(createCustomer)
 
 router.route('/create-admin')
     .post(createAdmin)
@@ -10,7 +10,12 @@ router.route('/create-admin')
 router.route('/signin')
     .post(signIn)
 
+router.route('/resend_otp')
+    .post(resendOTP)
+
+router.route('/verify_user')
+    .post(verifyUser)
+
 module.exports = router;
 
 
- 
