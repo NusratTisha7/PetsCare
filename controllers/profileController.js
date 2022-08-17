@@ -9,7 +9,7 @@ module.exports.createProfile = async (values) => {
         let values = [[email, phone, address, firstName, lastName, gender, profileImage, registrationID]]
         query(sql, [values])
     }).catch(err => {
-        return res.status(400).send({ message: 'Something failed!' });
+        return res.status(400).send({ status: 0, message: 'Something failed!' });
     })
 }
 
@@ -20,12 +20,12 @@ module.exports.getProfile = async (req, res) => {
         if (parseInt(userId) === req.user.result.id) {
             let sql = "SELECT * FROM profile where registrationID = ?";
             await query(sql, [userId]).then(response => {
-                return res.status(200).send(response)
+                return res.status(200).send({ response, status: 1 })
             }).catch(err => {
-                return res.status(400).send({ message: 'Something failed!' });
+                return res.status(400).send({ status: 0, message: 'Something failed!' });
             })
         } else {
-            return res.status(200).send({ message: 'Access denied' })
+            return res.status(400).send({ status: 0, message: 'Access denied' })
         }
     } catch (err) {
         return res.status(400).send(err)
@@ -42,13 +42,13 @@ module.exports.editProfile = async (req, res) => {
             }
             let sql = "UPDATE profile SET ? WHERE registrationID= ?";
             query(sql, [updateData, userId]).then(response => {
-                return res.status(200).send({ message: 'Profile updated successfully' })
+                return res.status(200).send({ status: 1, message: 'Profile updated successfully' })
             }).catch(err => {
-                return res.status(400).send({ message: 'Something failed!' });
+                return res.status(400).send({ status: 0, message: 'Something failed!' });
             })
 
         } else {
-            return res.status(200).send({ message: 'Access denied' })
+            return res.status(400).send({ status: 0, message: 'Access denied' })
         }
 
     } catch (err) {
@@ -65,12 +65,12 @@ module.exports.addAddress = async (req, res) => {
         let sql = "INSERT INTO address (name,phone,city,zip,address,type,profileID,userID) VALUES ?";
         let values = [[name, phone, city, zip, address, type, profileID, userID]]
         query(sql, [values]).then(response => {
-            return res.status(200).send({ message: 'Address added successfully' })
+            return res.status(200).send({ status: 1, message: 'Address added successfully' })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     }).catch(err => {
-        return res.status(400).send({ message: 'Something failed!' });
+        return res.status(400).send({ status: 0, message: 'Something failed!' });
     })
 }
 
@@ -79,9 +79,9 @@ module.exports.getAddress = async (req, res) => {
         let profileId = req.params.id
         let sql = "SELECT * FROM address where profileID = ?";
         query(sql, [profileId]).then(response => {
-            return res.status(200).send(response)
+            return res.status(200).send({ response, status: 1 })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     } catch (err) {
         return res.status(400).send(err)
@@ -93,9 +93,9 @@ module.exports.deleteAddress = async (req, res) => {
         let id = req.params.id
         let sql = "DELETE FROM address WHERE id = ?"
         query(sql, [id]).then(response => {
-            return res.status(200).send({ message: 'Successfully deleted' })
+            return res.status(200).send({ status: 1, message: 'Successfully deleted' })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     } catch (err) {
         return res.status(400).send(err)

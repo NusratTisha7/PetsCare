@@ -8,15 +8,15 @@ module.exports.addCartItem = async (req, res) => {
             let sql = "INSERT INTO cart (userID,productID,price,count) VALUES ?";
             let values = [[userID, productID, price, count]]
             await query(sql, [values]).then(response => {
-                return res.status(200).send({ message: 'Added to cart successfully!' })
+                return res.status(200).send({ status: 1, message: 'Added to cart successfully!' })
             }).catch(err => {
-                return res.status(400).send({ message: 'Something failed!' });
+                return res.status(400).send({ status: 0, message: 'Something failed!' });
             })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -25,12 +25,12 @@ module.exports.getCartItem = async (req, res) => {
         let userId = req.params.id
         let sql = "SELECT * FROM cart WHERE userID = ?";
         await query(sql, [userId]).then(response => {
-            return res.status(200).send(response)
+            return res.status(200).send({ response, status: 1 })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -39,12 +39,12 @@ module.exports.updateCartItem = async (req, res) => {
         let { count, cartID } = req.body
         let sql = "UPDATE cart SET count = " + count + " WHERE id = ?";
         await query(sql, [cartID]).then(response => {
-            return res.status(200).send({ message: 'Successfully updated' })
+            return res.status(200).send({ status: 1, message: 'Successfully updated' })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -53,12 +53,12 @@ module.exports.deleteCartItem = async (req, res) => {
         let cartId = req.params.id
         let sql = "DELETE FROM cart WHERE id = ?"
         await query(sql, [cartId]).then(response => {
-            return res.status(200).send({ message: 'Successfully deleted' })
+            return res.status(200).send({ status: 1, message: 'Successfully deleted' })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 

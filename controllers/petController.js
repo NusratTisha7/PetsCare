@@ -9,16 +9,16 @@ module.exports.addNewPet = async (req, res) => {
             let sql = "INSERT INTO pet (name,petCategoryID,breed,birthDate,gender,weight,description,petImage,createdBy) VALUES ?";
             let values = [[name, types, breed, birthDate, gender, weight, description, `${req.file.filename}`, createdBy]]
             await query(sql, [values]).then(response => {
-                return res.status(200).send({ message: 'New pet added successfully' })
+                return res.status(200).send({ status: 1, message: 'New pet added successfully' })
             }).catch(err => {
-                return res.status(400).send({ message: 'Something failed!' });
+                return res.status(400).send({ status: 0, message: 'Something failed!' });
             })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
 
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -26,12 +26,12 @@ module.exports.getAllPets = async (req, res) => {
     try {
         let sql = "SELECT * FROM pet";
         await query(sql).then(response => {
-            return res.status(200).send(response)
+            return res.status(200).send({ response, status: 1 })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -40,13 +40,13 @@ module.exports.getOnePet = async (req, res) => {
         let petId = req.params.id
         let sql = "SELECT * FROM pet where id = ?"
         await query(sql, [petId]).then(response => {
-            return res.status(200).send(response)
+            return res.status(200).send({ response, status: 1 })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
 
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -54,7 +54,7 @@ module.exports.editPet = async (req, res) => {
     try {
         let id = req.params.id
         if (req.body.petCategoryID) {
-            return res.status(400).send({ message: 'Pet type can not be edited!' });
+            return res.status(400).send({ status: 0, message: 'Pet type can not be edited!' });
         }
         let updateData = req.body
         if (req.file) {
@@ -62,12 +62,12 @@ module.exports.editPet = async (req, res) => {
         }
         let sql = "UPDATE pet SET ? WHERE id= ?";
         await query(sql, [updateData, id]).then(response => {
-            return res.status(200).send({ message: 'Pet updated successfully' })
+            return res.status(200).send({ status: 1, message: 'Pet updated successfully' })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -76,10 +76,10 @@ module.exports.deletePet = async (req, res) => {
         let id = req.params.id
         let sql = "DELETE FROM pet WHERE id = ?"
         await query(sql, [id], function (err, result) {
-            if (err) return res.status(400).send({ message: 'Something failed!' });
-            return res.status(200).send({ message: 'Successfully deleted' })
+            if (err) return res.status(400).send({ status: 0, message: 'Something failed!' });
+            return res.status(200).send({ status: 1, message: 'Successfully deleted' })
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }

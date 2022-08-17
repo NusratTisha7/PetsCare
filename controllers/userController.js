@@ -14,7 +14,7 @@ const findUser = async (email, callBack) => {
             callBack(err);
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -38,13 +38,13 @@ const sendOTP = async (email, otp, callBack) => {
 
         mail.sendMail(mailOptions, async function (err, info) {
             if (err) {
-                callBack({ msg: 'Something failed!', status: 400 })
+                callBack({ msg: 'Something failed!', status: 400, sts: 0 })
             } else {
-                callBack({ msg: 'OTP send successfully', status: 200 })
+                callBack({ msg: 'OTP send successfully', status: 200, sts: 1 })
             }
         })
     } catch (e) {
-        callBack({ msg: 'Something failed!', status: 400 })
+        callBack({ msg: 'Something failed!', status: 400, sts: 0 })
     }
 }
 
@@ -53,10 +53,10 @@ module.exports.verifyUser = async (req, res) => {
     try {
         const { email, otp } = req.body
         findUser(email, async (err, result) => {
-            if (err) return res.status(400).send({ message: 'Something failed!' });
+            if (err) return res.status(400).send({ status: 0, message: 'Something failed!' });
             if (result) {
                 if (result.length === 0) {
-                    return res.status(400).send({ message: 'User does not exist!' });
+                    return res.status(400).send({ status: 0, message: 'User does not exist!' });
                 } else {
                     if (result[0].otp == otp) {
                         let sql = "UPDATE user SET verified = " + 1 + " WHERE id = ?";
@@ -69,18 +69,18 @@ module.exports.verifyUser = async (req, res) => {
                             }
                             await createProfile(values)
                             let role = result[0].role.charAt(0).toUpperCase() + result[0].role.slice(1)
-                            return res.status(200).send({ message: `${role} Created Successfully` })
+                            return res.status(200).send({ status: 1, message: `${role} Created Successfully` })
                         }).catch(err => {
-                            return res.status(400).send({ message: 'Something failed!' });
+                            return res.status(400).send({ status: 0, message: 'Something failed!' });
                         })
                     } else {
-                        return res.status(400).send({ message: 'Invalid OTP!' });
+                        return res.status(400).send({ status: 0, message: 'Invalid OTP!' });
                     }
                 }
             }
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -92,15 +92,15 @@ module.exports.resendOTP = async (req, res) => {
             if (message.status == 200) {
                 let sql = "UPDATE user SET otp = " + otp + " WHERE email = ?";
                 await query(sql, [req.body.email]).then(async response => {
-                    return res.status(200).send({ message: 'OTP resend successfully!' });
+                    return res.status(200).send({ status: 1, message: 'OTP resend successfully!' });
                 })
             } else {
-                return res.status(400).send({ message: 'Something failed!' });
+                return res.status(400).send({ status: 0, message: 'Something failed!' });
             }
 
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -109,10 +109,10 @@ module.exports.signIn = async (req, res) => {
     try {
         let { email, password } = req.body
         await findUser(email, async (err, result) => {
-            if (err) return res.status(400).send({ message: 'Something failed!' });
+            if (err) return res.status(400).send({ status: 0, message: 'Something failed!' });
             if (result[0]) {
                 if (result[0].verified === 0) {
-                    return res.status(400).send({ message: 'Please verify your email and complete registration' })
+                    return res.status(400).send({ status: 0, message: 'Please verify your email and complete registration' })
                 } else {
                     const chekPass = await bcrypt.compare(password, result[0].password);
                     if (chekPass) {
@@ -122,19 +122,20 @@ module.exports.signIn = async (req, res) => {
                         return res.status(200).send({
                             message: 'Login Succssful!',
                             token: jsontoken,
+                            status: 1,
                         })
                     } else {
-                        return res.status(400).send({ message: 'Invlaid email or password' })
+                        return res.status(400).send({ status: 0, message: 'Invlaid email or password' })
                     }
                 }
 
 
             } else {
-                return res.status(400).send({ message: 'Email does not exists!' })
+                return res.status(400).send({ status: 0, message: 'Email does not exists!' })
             }
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -152,28 +153,28 @@ const signup = async (params, callBack) => {
         await query(sql).then(response => {
             findUser(email, async (err, result) => {
                 if (err) {
-                    callBack({ message: 'Something failed!', status: 400 });
+                    callBack({ message: 'Something failed!', status: 400, sts: 0 });
                 }
                 if (result[0]) {
-                    callBack({ message: 'Email already exists!', status: 400 })
+                    callBack({ message: 'Email already exists!', status: 400, sts: 0 })
                 }
                 else {
                     let sql = "INSERT INTO user (email, password, phone, address, role,verified,otp) VALUES ?";
                     let values = [[email, password, phone, address, role, verified, otp]]
                     await query(sql, [values]).then(async response => {
                         await sendOTP(email, otp, (otpResult) => {
-                            callBack({ message: otpResult.msg, status: otpResult.status });
+                            callBack({ message: otpResult.msg, status: otpResult.status, sts: otpResult.sts });
                         })
                     }).catch(err => {
-                        callBack({ message: 'Something failed!', status: 400 });
+                        callBack({ message: 'Something failed!', status: 400, sts: 0 });
                     })
                 }
             })
         }).catch(err => {
-            callBack({ message: 'Something failed!', status: 400 });
+            callBack({ message: 'Something failed!', status: 400, sts: 0 });
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -184,10 +185,10 @@ module.exports.createCustomer = async (req, res) => {
             email, password, phone, address, role: 'customer'
         }
         await signup(params, (result) => {
-            return res.status(result.status).send(result.message);
+            return res.status(result.status).send({ status: result.sts, msg: result.message });
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -198,9 +199,9 @@ module.exports.createAdmin = async (req, res) => {
             email, password, phone, address, role: 'admin'
         }
         await signup(params, (result) => {
-            return res.status(result.status).send(result.message);
+            return res.status(result.status).send({ status: result.sts, msg: result.message });
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }

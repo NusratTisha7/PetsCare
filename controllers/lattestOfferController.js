@@ -17,16 +17,16 @@ module.exports.addNewOffer = async (req, res) => {
             let sql = "INSERT INTO latest_offer (title, description, ProductID,categoryID,image) VALUES ?";
             let values = [[title, description, productID, categoryID, `${req.file.filename}`]]
             await query(sql, [values]).then(response => {
-                return res.status(200).send({ message: 'Offer added successfully' })
+                return res.status(200).send({ status: 1, message: 'Offer added successfully' })
             }).catch(err => {
-                return res.status(400).send({ message: 'Something failed!' });
+                return res.status(400).send({ status: 0, message: 'Something failed!' });
             })
 
         }).catch(err => {
             return res.status(400).send({ message: 'Something failed!' });
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, message: 'Something failed!' })
     }
 }
 
@@ -39,13 +39,13 @@ module.exports.editOffer = async (req, res) => {
         }
         let sql = "UPDATE latest_offer SET ? WHERE id= ?";
         await query(sql, [updateData, productId]).then(response => {
-            return res.status(200).send({ message: 'Offer updated successfully' })
+            return res.status(200).send({ status: 1, message: 'Offer updated successfully' })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
 
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, message: 'Something failed!' })
     }
 }
 
@@ -54,13 +54,13 @@ module.exports.getAllOffer = async (req, res) => {
         let productId = req.params.id
         let sql = "SELECT * FROM latest_offer";
         await query(sql, [productId]).then(response => {
-            return res.status(200).send(response)
+            return res.status(200).send({ response, status: 1, })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
 
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, message: 'Something failed!' })
     }
 }
 
@@ -69,12 +69,12 @@ module.exports.getOneOfferProduct = async (req, res) => {
         let productId = req.params.id
         let sql = "SELECT * FROM latest_offer WHERE productID = ?";
         await query(sql, [productId]).then(response => {
-            return res.status(200).send(response)
+            return res.status(200).send({ response, status: 1, })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, message: 'Something failed!' })
     }
 }
 
@@ -83,12 +83,12 @@ module.exports.getOneOfferCategory = async (req, res) => {
         let categoryId = req.params.id
         let sql = "SELECT * FROM latest_offer WHERE categoryID = ?";
         await query(sql, [categoryId]).then(response => {
-            return res.status(200).send(response)
+            return res.status(200).send({ response, status: 1, })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, message: 'Something failed!' })
     }
 }
 
@@ -97,12 +97,12 @@ module.exports.deleteOffer = async (req, res) => {
         let offerId = req.params.id
         let sql = "DELETE FROM latest_offer WHERE id = ?"
         await query(sql, [offerId]).then(response => {
-            return res.status(200).send({ message: 'Successfully deleted' })
+            return res.status(200).send({ status: 1, message: 'Successfully deleted' })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, message: 'Something failed!' })
     }
 }
 

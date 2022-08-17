@@ -9,16 +9,16 @@ module.exports.addNewProduct = async (req, res) => {
             let sql = "INSERT INTO product (name, description, price, details,productCategory,brandID,ProductImage,createdBy) VALUES ?";
             let values = [[name, description, price, details, productCategory, brandID, `${req.file.filename}`, createdBy]]
             await query(sql, [values]).then(response => {
-                return res.status(200).send({ message: 'New product added successfully' })
+                return res.status(200).send({ status: 1, message: 'New product added successfully' })
             }).catch(err => {
-                return res.status(400).send({ message: 'Something failed!' });
+                return res.status(400).send({ status: 0, message: 'Something failed!' });
             })
 
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -26,12 +26,12 @@ module.exports.getAllProducts = async (req, res) => {
     try {
         let sql = "SELECT * FROM product";
         await query(sql).then(response => {
-            return res.status(200).send(response)
+            return res.status(200).send({ response, status: 1 })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -40,13 +40,13 @@ module.exports.getOneProduct = async (req, res) => {
         let productId = req.params.id
         let sql = "SELECT * FROM product WHERE id = ?";
         await query(sql, [productId]).then(response => {
-            return res.status(200).send(response)
+            return res.status(200).send({ response, status: 1 })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
 
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -54,7 +54,7 @@ module.exports.editProduct = async (req, res) => {
     try {
         let id = req.params.id
         if (req.body.productCategory || req.body.brandID) {
-            return res.status(400).send({ message: `can not be edited foreign key!` });
+            return res.status(400).send({ status: 0, message: `can not be edited foreign key!` });
         }
         let updateData = req.body
         if (req.file) {
@@ -62,13 +62,13 @@ module.exports.editProduct = async (req, res) => {
         }
         let sql = "UPDATE product SET ? WHERE id= ?";
         await query(sql, [updateData, id]).then(response => {
-            return res.status(200).send({ message: 'Product updated successfully' })
+            return res.status(200).send({ status: 1, message: 'Product updated successfully' })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
 
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -77,13 +77,13 @@ module.exports.deleteProduct = async (req, res) => {
         let id = req.params.id
         let sql = "DELETE FROM product WHERE id = ?"
         await query(sql, [id]).then(response => {
-            return res.status(200).send({ message: 'Successfully deleted' })
+            return res.status(200).send({ status: 1, message: 'Successfully deleted' })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
 
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -92,13 +92,13 @@ module.exports.sortByCategory = async (req, res) => {
         let productId = req.params.id
         let sql = "SELECT * FROM product WHERE productCategory = ?";
         await query(sql, [productId]).then(response => {
-            return res.status(200).send(response)
+            return res.status(200).send({ response, status: 1 })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
 
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -120,13 +120,13 @@ module.exports.sortProduct = async (req, res) => {
                 break;
         }
         await query(sql).then(response => {
-            return res.status(200).send(response)
+            return res.status(200).send({ response, status: 1 })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
 
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -135,13 +135,13 @@ module.exports.searchProduct = async (req, res) => {
         let serachTerm = req.body.serachTerm;
         let sql = "SELECT * FROM product WHERE name LIKE '%" + serachTerm + "%'"
         await query(sql).then(response => {
-            return res.status(200).send(response)
+            return res.status(200).send({ response, status: 1 })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
 
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -155,12 +155,12 @@ module.exports.filterProduct = async (req, res) => {
             sql = "SELECT * from product where price BETWEEN " + req.body.start + " AND " + req.body.end + ""
         }
         await query(sql).then(response => {
-            return res.status(200).send(response)
+            return res.status(200).send({ response, status: 1 })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
 
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }

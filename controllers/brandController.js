@@ -9,15 +9,15 @@ module.exports.addNewBrand = async (req, res) => {
             let sql = "INSERT INTO brand (name,createdBy) VALUES ?";
             let values = [[name, createdBy]]
             await query(sql, [values]).then(response => {
-                return res.status(200).send({ message: 'Brand Added successfully' })
+                return res.status(200).send({ status: 1, message: 'Brand Added successfully' })
             }).catch(err => {
-                return res.status(400).send({ message: 'Something failed!' });
+                return res.status(400).send({ status: 0, message: 'Something failed!' });
             })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -25,12 +25,12 @@ module.exports.getAllBrandItem = async (req, res) => {
     try {
         let sql = "SELECT * FROM brand";
         await query(sql).then(response => {
-            return res.status(200).send(response)
+            return res.status(200).send({ response, status: 1 })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -40,12 +40,12 @@ module.exports.editBrand = async (req, res) => {
         let updateData = req.body
         let sql = "UPDATE brand SET ? WHERE id= ?";
         await query(sql, [updateData, brandId]).then(response => {
-            return res.status(200).send({ message: 'Brand updated successfully' })
+            return res.status(200).send({ status: 1, message: 'Brand updated successfully' })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }
 
@@ -54,11 +54,11 @@ module.exports.deleteBrand = async (req, res) => {
         let brandId = req.params.id
         let sql = "DELETE FROM brand WHERE id = ?"
         await query(sql, [brandId]).then(response => {
-            return res.status(200).send({ message: 'Successfully deleted' })
+            return res.status(200).send({ status: 1, message: 'Successfully deleted' })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     } catch (err) {
-        return res.status(400).send(err)
+        return res.status(400).send({ status: 0, msg: err })
     }
 }

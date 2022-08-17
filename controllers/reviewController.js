@@ -16,15 +16,15 @@ module.exports.addReview = async (req, res) => {
             let sql = "INSERT INTO reviews (rating, review, productID, petID,userID,type) VALUES ?";
             let values = [[rating, review, productID, petID, userID, type]]
             await query(sql, [values]).then(response => {
-                return res.status(200).send({ message: 'Review Added successfully' })
+                return res.status(200).send({ status: 1, message: 'Review Added successfully' })
             }).catch(err => {
-                return res.status(400).send({ message: 'Something failed!' });
+                return res.status(400).send({ status: 0, message: 'Something failed!' });
             })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     } catch (err) {
-        return res.status(400).send({ message: 'Something failed!' });
+        return res.status(400).send({ status: 0, message: 'Something failed!' });
     }
 }
 
@@ -33,12 +33,12 @@ module.exports.getReviews = async (req, res) => {
     try {
         let sql = `SELECT * FROM reviews WHERE ${req.body.searchTrm} = ?`;
         await query(sql, [req.body.value]).then(response => {
-            return res.status(200).send(response)
+            return res.status(200).send({ response, status: 1 })
         }).catch(err => {
-            return res.status(400).send({ message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
     } catch (err) {
-        return res.status(400).send({ message: 'Something failed!' });
+        return res.status(400).send({ status: 0, message: 'Something failed!' });
     }
 }
 
