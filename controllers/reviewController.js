@@ -30,6 +30,7 @@ module.exports.addReview = async (req, res) => {
 
 
 module.exports.getReviews = async (req, res) => {
+    console.log("SSS")
     try {
         let sql = `SELECT * FROM reviews WHERE ${req.body.searchTrm} = ?`;
         await query(sql, [req.body.value]).then(response => {

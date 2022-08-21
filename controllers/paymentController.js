@@ -23,10 +23,10 @@ const initPayment = async (values, callBack) => {
         process.env.SSLCOMMERZ_STORE_PASSWORD
     );
     payment.setUrls({
-        success: "",
-        fail: "",
-        cancel: "",
-        ipn: "",
+        success: "https://nodeapi.sajidur.com/api/payment/success",
+        fail: "https://nodeapi.sajidur.com/api/payment/failure",
+        cancel: "https://nodeapi.sajidur.com/api/payment/cancel",
+        ipn: "https://nodeapi.sajidur.com/api/payment/ipn",
     });
     payment.setOrderInfo({
         total_amount: totalAmount,
@@ -172,8 +172,79 @@ module.exports.hotel = async (req, res) => {
 
 
 
-module.exports.ipn = async (req, res) => {
+const checktable = async (transaction_id, callBack) => {
+    try {
+        let sql = "DROP PROCEDURE IF EXISTS getTableName;"
+        query(sql).then(response => {
+            let sql = "CREATE PROCEDURE getTableName(IN trxid VARCHAR(100),OUT countOrder INT,OUT countAdoption INT,OUT countHotel INT,OUT countTreatment INT)\n" +
+                " BEGIN\n" +
+                "SELECT COUNT(orders.id) INTO countOrder FROM orders WHERE orders.transactionID = trxid;  SELECT COUNT(adoption.id) INTO countAdoption FROM adoption WHERE adoption.transactionID = trxid; SELECT COUNT(hotel.id) INTO countHotel FROM hotel WHERE hotel.transactionID = trxid; SELECT COUNT(treatment.id) INTO countTreatment FROM treatment WHERE treatment.transactionID = trxid;\n" +
+                "END ";
+            query(sql).then(response => {
+                let sql = `call getTableName("${transaction_id}",@order,@adoption,@hotel,@treatment)`
+                query(sql).then(response => {
+                    let sql = `select @order as odr,@adoption as adp,@hotel as htl,@treatment as trt`
+                    query(sql).then(response => {
+                        if (response[0].odr === 1) {
+                            callBack(null, 'orders')
+                        } else if (response[0].adp === 1) {
+                            callBack(null, 'adoption')
+                        } else if (response[0].htl === 1) {
+                            callBack(null, 'hotel')
+                        } else if (response[0].trt === 1) {
+                            callBack(null, 'treatment')
+                        }
+                    }).catch(err => {
+                        callBack(err)
+                    })
+                })
+            })
+        })
+    } catch (err) {
+        return res.status(400).send({ status: 0, msg: err })
+    }
 }
+
+
+module.exports.ipn = async (req, res) => {
+    try {
+        let transaction_id = req.body.tran_id
+        checktable(transaction_id, async (err, result) => {
+            if (err) return res.status(400).send({ status: 0, message: 'Something failed!' });
+            if (result) {
+                let status = req.body.payment['status']
+                let updateData = {
+                    paymentStatus: status,
+                    validationId: req.body.val_id
+                }
+                let sql = "UPDATE " + result + " SET ? WHERE transactionID= ?";
+                query(sql, [updateData, transaction_id]).then(response => {
+                    if (status === "VALID") {
+                        return res.status(200).send({ status: 1, message: 'Payment has been valid' })
+                    } else if (status === "FAILED ") {
+                        return res.status(200).send({ status: 1, message: 'Payment has been failed' })
+                    } else if (status === "CANCELLED ") {
+                        return res.status(200).send({ status: 1, message: 'Payment has been canceled' })
+                    }
+
+                }).catch(err => {
+                    return res.status(400).send(err);
+                })
+            }
+        })
+
+    } catch (err) {
+        return res.status(400).send(err)
+    }
+}
+
 
 module.exports.paymentSuccess = async (req, res) => {
 }
+
+module.exports.paymentCancel = async (req, res) => {
+}
+
+module.exports.paymentFail = async (req, res) => {
+}
+

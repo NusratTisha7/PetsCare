@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { product, pet, treatment, hotel, ipn, paymentSuccess } = require('../controllers/paymentController');
+const { product, pet, treatment, hotel, ipn, paymentSuccess, paymentCancel, paymentFail } = require('../controllers/paymentController');
 const authorize = require('../middlewares/authorize');
 
 router.route('/product')
@@ -19,5 +19,13 @@ router.route('/ipn')
 
 router.route('/success')
     .post(paymentSuccess);
+
+router.route('/cancel')
+    .post(paymentCancel);
+
+router.route('/failure')
+    .post(paymentFail);
+
+
 
 module.exports = router;
