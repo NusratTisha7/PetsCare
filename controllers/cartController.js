@@ -3,10 +3,10 @@ const query = require('../config/db')
 module.exports.addCartItem = async (req, res) => {
     try {
         let { userID, productID, price, count } = req.body
-        let sql = "CREATE TABLE IF NOT EXISTS cart (id INT AUTO_INCREMENT PRIMARY KEY, price int, count int, userID int, FOREIGN KEY (userID) REFERENCES user(id),productID int, FOREIGN KEY (productID) REFERENCES product(id))";
+        let sql = "CREATE TABLE IF NOT EXISTS cart (id INT AUTO_INCREMENT PRIMARY KEY, price int, count int, userID int, FOREIGN KEY (userID) REFERENCES user(id),productID int, FOREIGN KEY (productID) REFERENCES product(id),isActive BOOLEAN)";
         await query(sql).then(async response => {
-            let sql = "INSERT INTO cart (userID,productID,price,count) VALUES ?";
-            let values = [[userID, productID, price, count]]
+            let sql = "INSERT INTO cart (userID,productID,price,count,isActive) VALUES ?";
+            let values = [[userID, productID, price, count,1]]
             await query(sql, [values]).then(response => {
                 return res.status(200).send({ status: 1, message: 'Added to cart successfully!' })
             }).catch(err => {
@@ -54,6 +54,20 @@ module.exports.deleteCartItem = async (req, res) => {
         let sql = "DELETE FROM cart WHERE id = ?"
         await query(sql, [cartId]).then(response => {
             return res.status(200).send({ status: 1, message: 'Successfully deleted' })
+        }).catch(err => {
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
+        })
+    } catch (err) {
+        return res.status(400).send({ status: 0, msg: err })
+    }
+}
+
+module.exports.editActiveStatus = async (req, res) => {
+    try {
+        let { activeStatus,id } = req.body
+        let sql = "UPDATE cart SET isActive = " + activeStatus + " WHERE id = "+id+"";
+        await query(sql).then(response => {
+            return res.status(200).send({ status: 1, message: 'Successfully updated' })
         }).catch(err => {
             return res.status(400).send({ status: 0, message: 'Something failed!' });
         })

@@ -52,6 +52,7 @@ const sendOTP = async (email, otp, callBack) => {
 module.exports.verifyUser = async (req, res) => {
     try {
         const { email, otp } = req.body
+        console.log(req.body)
         findUser(email, async (err, result) => {
             if (err) return res.status(400).send({ status: 0, message: 'Something failed!' });
             if (result) {
@@ -147,9 +148,8 @@ const signup = async (params, callBack) => {
         const salt = await bcrypt.genSalt(10);
         password = await bcrypt.hash(password, salt);
         let otp = Math.floor(100000 + Math.random() * 900000)
-        let verified = 0
 
-        let sql = "CREATE TABLE IF NOT EXISTS user (id INT AUTO_INCREMENT PRIMARY KEY, email VARCHAR(255), password VARCHAR(255), phone VARCHAR(255), address VARCHAR(255),role VARCHAR(255),verified BOOLEAN,otp int)";
+        let sql = "CREATE TABLE IF NOT EXISTS user (id INT AUTO_INCREMENT PRIMARY KEY, email VARCHAR(255), password VARCHAR(255), phone VARCHAR(255), address VARCHAR(255),role VARCHAR(255),verified BOOLEAN,otp int,isActive BOOLEAN)";
         await query(sql).then(response => {
             findUser(email, async (err, result) => {
                 if (err) {
@@ -159,8 +159,8 @@ const signup = async (params, callBack) => {
                     callBack({ message: 'Email already exists!', status: 400, sts: 0 })
                 }
                 else {
-                    let sql = "INSERT INTO user (email, password, phone, address, role,verified,otp) VALUES ?";
-                    let values = [[email, password, phone, address, role, verified, otp]]
+                    let sql = "INSERT INTO user (email, password, phone, address, role,isActive,verified,otp) VALUES ?";
+                    let values = [[email, password, phone, address, role, 1, 0, otp]]
                     await query(sql, [values]).then(async response => {
                         await sendOTP(email, otp, (otpResult) => {
                             callBack({ message: otpResult.msg, status: otpResult.status, sts: otpResult.sts });
@@ -205,3 +205,18 @@ module.exports.createAdmin = async (req, res) => {
         return res.status(400).send({ status: 0, msg: err })
     }
 }
+
+module.exports.editActiveStatus = async (req, res) => {
+    try {
+        let { activeStatus,id } = req.body
+        let sql = "UPDATE user SET isActive = " + activeStatus + " WHERE id = "+id+"";
+        await query(sql).then(response => {
+            return res.status(200).send({ status: 1, message: 'Successfully updated' })
+        }).catch(err => {
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
+        })
+    } catch (err) {
+        return res.status(400).send({ status: 0, msg: err })
+    }
+}
+

@@ -3,15 +3,15 @@ const query = require('../config/db')
 module.exports.addNewProduct = async (req, res) => {
     try {
         let createdBy = req.user.result.id
-        let { name, description, price, details, brandID, productCategory } = req.body
-        let sql = "CREATE TABLE IF NOT EXISTS product (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), description VARCHAR(255), price int, details VARCHAR(255), productCategory int, FOREIGN KEY (productCategory) REFERENCES product_category(id), brandID int, ProductImage VARCHAR(255),FOREIGN KEY (brandID) REFERENCES brand(id),createdBy int ,FOREIGN KEY (createdBy) REFERENCES user(id))";
+        let { name, description, price, details, brandID, productCategory, discount } = req.body
+        let sql = "CREATE TABLE IF NOT EXISTS product (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), description VARCHAR(255), price int, details VARCHAR(255), productCategory int, FOREIGN KEY (productCategory) REFERENCES product_category(id), brandID int, ProductImage VARCHAR(255),FOREIGN KEY (brandID) REFERENCES brand(id),createdBy int ,FOREIGN KEY (createdBy) REFERENCES user(id),isActive BOOLEAN,discount int )";
         await query(sql).then(async response => {
-            let sql = "INSERT INTO product (name, description, price, details,productCategory,brandID,ProductImage,createdBy) VALUES ?";
-            let values = [[name, description, price, details, productCategory, brandID, `${req.file.filename}`, createdBy]]
+            let sql = "INSERT INTO product (name, description, price, details,productCategory,brandID,ProductImage,createdBy, discount, isActive) VALUES ?";
+            let values = [[name, description, price, details, productCategory, brandID, `${req.file.filename}`, createdBy, discount, 1]]
             await query(sql, [values]).then(response => {
                 return res.status(200).send({ status: 1, message: 'New product added successfully' })
             }).catch(err => {
-                return res.status(400).send({ status: 0, message: 'Something failed!' });
+                return res.status(400).send({ status: 0, message: err });
             })
 
         }).catch(err => {
@@ -39,8 +39,18 @@ module.exports.getOneProduct = async (req, res) => {
     try {
         let productId = req.params.id
         let sql = "SELECT * FROM product WHERE id = ?";
-        await query(sql, [productId]).then(response => {
-            return res.status(200).send({ response, status: 1 })
+        await query(sql, [productId]).then(async response => {
+           let sql="SELECT * FROM reviews INNER JOIN profile ON reviews.profileID=profile.id WHERE productID=?"
+            await query(sql, [productId]).then(review => {
+                let rating=0
+                for(let data of review){
+                    rating+=data.rating
+                }
+                response[0].avgRating=(rating/review.length).toFixed(1)
+                response[0].allReviews= review
+                return res.status(200).send({ response, status: 1 })
+            })
+            
         }).catch(err => {
             return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
@@ -160,6 +170,21 @@ module.exports.filterProduct = async (req, res) => {
             return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
 
+    } catch (err) {
+        return res.status(400).send({ status: 0, msg: err })
+    }
+}
+
+module.exports.editActiveStatus = async (req, res) => {
+    try {
+        let { activeStatus, id } = req.body
+        console.log(req.body)
+        let sql = "UPDATE product SET isActive = " + activeStatus + " WHERE id = " + id + "";
+        await query(sql).then(response => {
+            return res.status(200).send({ status: 1, message: 'Successfully updated' })
+        }).catch(err => {
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
+        })
     } catch (err) {
         return res.status(400).send({ status: 0, msg: err })
     }
