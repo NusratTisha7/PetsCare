@@ -11,7 +11,7 @@ module.exports.addReview = async (req, res) => {
         if (req.body.productID) {
             productID = req.body.productID
         }
-        let sql = "CREATE TABLE IF NOT EXISTS reviews (id INT AUTO_INCREMENT PRIMARY KEY, rating int, review VARCHAR(255), productID int, profileID int, FOREIGN KEY (productID) REFERENCES product(id),FOREIGN KEY (profileID) REFERENCES profile(id),petID int ,FOREIGN KEY (petID) REFERENCES pet(id),type VARCHAR(255),isActive BOOLEAN)";
+        let sql = "CREATE TABLE IF NOT EXISTS reviews (id INT AUTO_INCREMENT PRIMARY KEY, rating int, review TEXT, productID int, profileID int, FOREIGN KEY (productID) REFERENCES product(id),FOREIGN KEY (profileID) REFERENCES profile(id),petID int ,FOREIGN KEY (petID) REFERENCES pet(id),type VARCHAR(255),isActive BOOLEAN)";
         await query(sql).then(async response => {
             let sql = "INSERT INTO reviews (rating, review, productID, petID,profileID,type,isActive) VALUES ?";
             let values = [[rating, review, productID, petID, profileID, type,1]]
@@ -30,6 +30,19 @@ module.exports.addReview = async (req, res) => {
 
 
 module.exports.getReviews = async (req, res) => {
+    try {
+        let sql = `SELECT * FROM reviews WHERE ${req.body.searchTrm} = ? AND isActive=1`;
+        await query(sql, [req.body.value]).then(response => {
+            return res.status(200).send({ response, status: 1 })
+        }).catch(err => {
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
+        })
+    } catch (err) {
+        return res.status(400).send({ status: 0, message: 'Something failed!' });
+    }
+}
+
+module.exports.getReviewsAdmin = async (req, res) => {
     try {
         let sql = `SELECT * FROM reviews WHERE ${req.body.searchTrm} = ?`;
         await query(sql, [req.body.value]).then(response => {

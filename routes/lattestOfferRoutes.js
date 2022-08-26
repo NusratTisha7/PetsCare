@@ -6,7 +6,8 @@ const {
     getOneOfferProduct,
     getOneOfferCategory,
     deleteOffer,
-    editActiveStatus
+    editActiveStatus,
+    getAllOfferAdmin
 } = require('../controllers/lattestOfferController');
 const authorize = require('../middlewares/authorize');
 const verifyAdmin = require('../middlewares/verifyAdmin');
@@ -15,7 +16,7 @@ const upload = require("../middlewares/multer");
 router.route('/')
     .post([authorize, verifyAdmin], upload.single("photo"), addNewOffer)
     .get(getAllOffer)
-    .put([authorize, verifyAdmin],editActiveStatus)
+    .put([authorize, verifyAdmin], editActiveStatus)
 
 router.route('/:id')
     .delete([authorize, verifyAdmin], deleteOffer)
@@ -26,5 +27,8 @@ router.route('/product/:id')
 
 router.route('/category/:id')
     .get(getOneOfferCategory)
+
+router.route('/admin')
+    .get([authorize, verifyAdmin], getAllOfferAdmin)
 
 module.exports = router;

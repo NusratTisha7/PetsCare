@@ -12,7 +12,7 @@ module.exports.addNewOffer = async (req, res) => {
         if (req.body.productID) {
             productID = req.body.productID
         }
-        let sql = "CREATE TABLE IF NOT EXISTS latest_offer (id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(255),subTitle VARCHAR(255), description VARCHAR(255), image VARCHAR(255), productID int, FOREIGN KEY (productID) REFERENCES product(id), categoryID int, FOREIGN KEY (categoryID) REFERENCES product_category(id),isActive BOOLEAN)";
+        let sql = "CREATE TABLE IF NOT EXISTS latest_offer (id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(255),subTitle VARCHAR(255), description TEXT, image VARCHAR(255), productID int, FOREIGN KEY (productID) REFERENCES product(id), categoryID int, FOREIGN KEY (categoryID) REFERENCES product_category(id),isActive BOOLEAN)";
         await query(sql).then(async response => {
             let sql = "INSERT INTO latest_offer (title,subTitle, description, ProductID,categoryID,image,isActive) VALUES ?";
             let values = [[title, subTitle, description, productID, categoryID, `${req.file.filename}`, 1]]
@@ -50,6 +50,21 @@ module.exports.editOffer = async (req, res) => {
 }
 
 module.exports.getAllOffer = async (req, res) => {
+    try {
+        let productId = req.params.id
+        let sql = "SELECT * FROM latest_offer WHERE isActive=1";
+        await query(sql, [productId]).then(response => {
+            return res.status(200).send({ response, status: 1, })
+        }).catch(err => {
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
+        })
+
+    } catch (err) {
+        return res.status(400).send({ status: 0, message: 'Something failed!' })
+    }
+}
+
+module.exports.getAllOfferAdmin = async (req, res) => {
     try {
         let productId = req.params.id
         let sql = "SELECT * FROM latest_offer";

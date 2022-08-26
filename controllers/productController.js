@@ -4,7 +4,7 @@ module.exports.addNewProduct = async (req, res) => {
     try {
         let createdBy = req.user.result.id
         let { name, description, price, details, brandID, productCategory, discount } = req.body
-        let sql = "CREATE TABLE IF NOT EXISTS product (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), description VARCHAR(255), price int, details VARCHAR(255), productCategory int, FOREIGN KEY (productCategory) REFERENCES product_category(id), brandID int, ProductImage VARCHAR(255),FOREIGN KEY (brandID) REFERENCES brand(id),createdBy int ,FOREIGN KEY (createdBy) REFERENCES user(id),isActive BOOLEAN,discount int )";
+        let sql = "CREATE TABLE IF NOT EXISTS product (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), description TEXT, price int, details VARCHAR(255), productCategory int, FOREIGN KEY (productCategory) REFERENCES product_category(id), brandID int, ProductImage VARCHAR(255),FOREIGN KEY (brandID) REFERENCES brand(id),createdBy int ,FOREIGN KEY (createdBy) REFERENCES user(id),isActive BOOLEAN,discount int )";
         await query(sql).then(async response => {
             let sql = "INSERT INTO product (name, description, price, details,productCategory,brandID,ProductImage,createdBy, discount, isActive) VALUES ?";
             let values = [[name, description, price, details, productCategory, brandID, `${req.file.filename}`, createdBy, discount, 1]]
@@ -23,6 +23,20 @@ module.exports.addNewProduct = async (req, res) => {
 }
 
 module.exports.getAllProducts = async (req, res) => {
+    try {
+        let sql = "SELECT * FROM product WHERE isActive=1";
+        await query(sql).then(response => {
+            return res.status(200).send({ response, status: 1 })
+        }).catch(err => {
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
+        })
+    } catch (err) {
+        return res.status(400).send({ status: 0, msg: err })
+    }
+}
+
+
+module.exports.getAllProductsAdmin = async (req, res) => {
     try {
         let sql = "SELECT * FROM product";
         await query(sql).then(response => {

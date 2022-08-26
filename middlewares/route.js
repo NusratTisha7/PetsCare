@@ -9,6 +9,8 @@ const reviewRoutes = require('../routes/reviewRoutes');
 const lattestOfferRoutes = require('../routes/lattestOfferRoutes');
 const profileRoutes = require('../routes/profileRoutes');
 const paymentRoutes = require('../routes/paymentRoutes');
+const bestSellerRoutes = require('../routes/bestSellerRoutes');
+
 
 module.exports = (app) => {
     app.use('/api/user', userRoutes);
@@ -22,4 +24,5 @@ module.exports = (app) => {
     app.use('/api/profile', profileRoutes);
     app.use('/api/review', reviewRoutes);
     app.use('/api/payment', paymentRoutes);
+    app.use('/api/best_seller', bestSellerRoutes);
 }

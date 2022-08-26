@@ -23,16 +23,23 @@ const sendOTP = async (email, otp, callBack) => {
     try {
         const mail = nodemailer.createTransport({
             service: 'gmail',
+            host: process.env.MAILHOST,
+            port: process.env.MAILPORT,
+            tls: {
+                // do not fail on invalid certs
+                rejectUnauthorized: false,
+            },
+            secure: false, // upgrade later with STARTTLS
             auth: {
                 user: process.env.EMAIL,
                 pass: process.env.EMAILPASS
-            }
+            },
         });
 
         const mailOptions = {
             from: process.env.EMAIL,
             to: email,
-            subject: 'Reset Password Link',
+            subject: 'Pet Food OTP',
             html: '<h1>Your OTP is : ' + otp + '</p>',
         };
 
@@ -208,8 +215,8 @@ module.exports.createAdmin = async (req, res) => {
 
 module.exports.editActiveStatus = async (req, res) => {
     try {
-        let { activeStatus,id } = req.body
-        let sql = "UPDATE user SET isActive = " + activeStatus + " WHERE id = "+id+"";
+        let { activeStatus, id } = req.body
+        let sql = "UPDATE user SET isActive = " + activeStatus + " WHERE id = " + id + "";
         await query(sql).then(response => {
             return res.status(200).send({ status: 1, message: 'Successfully updated' })
         }).catch(err => {

@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { createPetCategory, getAll, editPetCategory, deletePetCategory,editActiveStatus } = require('../controllers/petCategoryController')
+const { createPetCategory, getAll, editPetCategory, deletePetCategory,editActiveStatus,getAllForAdmin } = require('../controllers/petCategoryController')
 const authorize = require('../middlewares/authorize');
 const verifyAdmin = require('../middlewares/verifyAdmin');
 
@@ -11,5 +11,8 @@ router.route('/')
 router.route('/:id')
     .put([authorize, verifyAdmin], editPetCategory)
     .delete([authorize, verifyAdmin], deletePetCategory)
+
+    router.route('/admin')
+    .get([authorize, verifyAdmin], getAllForAdmin)
 
 module.exports = router;

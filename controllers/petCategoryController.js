@@ -25,6 +25,20 @@ module.exports.createPetCategory = async (req, res) => {
 
 module.exports.getAll = async (req, res) => {
     try {
+        let sql = "SELECT * FROM pet_category WHERE isActive=1";
+        await query(sql).then(response => {
+            return res.status(200).send({ response, status: 1 })
+        }).catch(err => {
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
+        })
+    } catch (err) {
+        return res.status(400).send({ status: 0, msg: err })
+    }
+}
+
+
+module.exports.getAllForAdmin = async (req, res) => {
+    try {
         let sql = "SELECT * FROM pet_category";
         await query(sql).then(response => {
             return res.status(200).send({ response, status: 1 })
