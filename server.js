@@ -9,6 +9,9 @@ app.use(cors())
 app.use(error)
 app.use(express.urlencoded({ extended: true }))
 
+
+global.__basedir = __dirname;
+
 require('./middlewares/route')(app);
 
 app.use('/api/media/img/', express.static('media/img'));

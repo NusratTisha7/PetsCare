@@ -2,7 +2,10 @@ const query = require('../config/db')
 
 module.exports.addCartItem = async (req, res) => {
     try {
-        let { userID, productID, price, count } = req.body
+        let { userID, productID, count } = req.body
+        let getPriceSql = "SELECT * FROM product WHERE id = ?";
+        let [result]=await query(getPriceSql,[productID])
+        price = result.price
         let sql = "CREATE TABLE IF NOT EXISTS cart (id INT AUTO_INCREMENT PRIMARY KEY, price int, count int, userID int, FOREIGN KEY (userID) REFERENCES user(id),productID int, FOREIGN KEY (productID) REFERENCES product(id),isActive BOOLEAN)";
         await query(sql).then(async response => {
             let sql = "INSERT INTO cart (userID,productID,price,count,isActive) VALUES ?";

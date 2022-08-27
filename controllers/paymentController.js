@@ -4,6 +4,7 @@ const { productOrder } = require('../Orders/productOrder');
 const { adaption } = require('../Orders/adaption');
 const { treatment } = require('../Orders/bookTreatment');
 const { hotel } = require('../Orders/bookHotel');
+const path = require('path');
 
 
 const initPayment = async (values, callBack) => {
@@ -240,11 +241,14 @@ module.exports.ipn = async (req, res) => {
 
 
 module.exports.paymentSuccess = async (req, res) => {
+    res.sendFile(path.join(__basedir + "/public/paymentSuccess.html"))
 }
 
 module.exports.paymentCancel = async (req, res) => {
+    res.sendFile(path.join(__basedir + "/public/paymentCancel.html"))
 }
 
 module.exports.paymentFail = async (req, res) => {
+    res.sendFile(path.join(__basedir + "/public/paymentFail.html"))
 }
 

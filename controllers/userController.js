@@ -2,8 +2,8 @@ const query = require('../config/db')
 const bcrypt = require('bcrypt');
 const { sign } = require("jsonwebtoken");
 const { createProfile } = require('../controllers/profileController');
-const nodemailer = require('nodemailer')
-
+//const nodemailer = require('nodemailer')
+const { mail } = require('../sendMail/mail');
 
 const findUser = async (email, callBack) => {
     try {
@@ -19,47 +19,46 @@ const findUser = async (email, callBack) => {
 }
 
 
-const sendOTP = async (email, otp, callBack) => {
-    try {
-        const mail = nodemailer.createTransport({
-            service: 'gmail',
-            host: process.env.MAILHOST,
-            port: process.env.MAILPORT,
-            tls: {
-                // do not fail on invalid certs
-                rejectUnauthorized: false,
-            },
-            secure: false, // upgrade later with STARTTLS
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.EMAILPASS
-            },
-        });
+// const sendOTP = async (email, otp, callBack) => {
+//     try {
+//         const mail = nodemailer.createTransport({
+//             service: 'gmail',
+//             host: process.env.MAILHOST,
+//             port: process.env.MAILPORT,
+//             tls: {
+//                 // do not fail on invalid certs
+//                 rejectUnauthorized: false,
+//             },
+//             secure: false, // upgrade later with STARTTLS
+//             auth: {
+//                 user: process.env.EMAIL,
+//                 pass: process.env.EMAILPASS
+//             },
+//         });
 
-        const mailOptions = {
-            from: process.env.EMAIL,
-            to: email,
-            subject: 'Pet Food OTP',
-            html: '<h1>Your OTP is : ' + otp + '</p>',
-        };
+//         const mailOptions = {
+//             from: process.env.EMAIL,
+//             to: email,
+//             subject: 'Pet Food OTP',
+//             html: '<h1>Your OTP is : ' + otp + '</p>',
+//         };
 
-        mail.sendMail(mailOptions, async function (err, info) {
-            if (err) {
-                callBack({ msg: 'Something failed!', status: 400, sts: 0 })
-            } else {
-                callBack({ msg: 'OTP send successfully', status: 200, sts: 1 })
-            }
-        })
-    } catch (e) {
-        callBack({ msg: 'Something failed!', status: 400, sts: 0 })
-    }
-}
+//         mail.sendMail(mailOptions, async function (err, info) {
+//             if (err) {
+//                 callBack({ msg: 'Something failed!', status: 400, sts: 0 })
+//             } else {
+//                 callBack({ msg: 'OTP send successfully', status: 200, sts: 1 })
+//             }
+//         })
+//     } catch (e) {
+//         callBack({ msg: 'Something failed!', status: 400, sts: 0 })
+//     }
+// }
 
 
 module.exports.verifyUser = async (req, res) => {
     try {
         const { email, otp } = req.body
-        console.log(req.body)
         findUser(email, async (err, result) => {
             if (err) return res.status(400).send({ status: 0, message: 'Something failed!' });
             if (result) {
@@ -96,7 +95,8 @@ module.exports.verifyUser = async (req, res) => {
 module.exports.resendOTP = async (req, res) => {
     try {
         let otp = Math.floor(100000 + Math.random() * 900000)
-        sendOTP(req.body.email, otp, async (message) => {
+        let text = '<h1>Your OTP is : ' + otp + '</p>'
+        mail(req.body.email, otp, text,async (message) => {
             if (message.status == 200) {
                 let sql = "UPDATE user SET otp = " + otp + " WHERE email = ?";
                 await query(sql, [req.body.email]).then(async response => {
@@ -155,7 +155,7 @@ const signup = async (params, callBack) => {
         const salt = await bcrypt.genSalt(10);
         password = await bcrypt.hash(password, salt);
         let otp = Math.floor(100000 + Math.random() * 900000)
-
+        let text = '<h1>Your OTP is : ' + otp + '</p>'
         let sql = "CREATE TABLE IF NOT EXISTS user (id INT AUTO_INCREMENT PRIMARY KEY, email VARCHAR(255), password VARCHAR(255), phone VARCHAR(255), address VARCHAR(255),role VARCHAR(255),verified BOOLEAN,otp int,isActive BOOLEAN)";
         await query(sql).then(response => {
             findUser(email, async (err, result) => {
@@ -169,7 +169,7 @@ const signup = async (params, callBack) => {
                     let sql = "INSERT INTO user (email, password, phone, address, role,isActive,verified,otp) VALUES ?";
                     let values = [[email, password, phone, address, role, 1, 0, otp]]
                     await query(sql, [values]).then(async response => {
-                        await sendOTP(email, otp, (otpResult) => {
+                        await mail(email, otp, text,(otpResult) => {
                             callBack({ message: otpResult.msg, status: otpResult.status, sts: otpResult.sts });
                         })
                     }).catch(err => {
