@@ -26,7 +26,8 @@ router.route('/search/product')
 router.route('/filter/product')
     .get(filterProduct)
 
-router.route('/admin/getAllProductsAdmin')
-    .get([authorize, verifyAdmin], getAllProductsAdmin)
+router.route('/admin/getAllProductsAdmin/:page')
+    //.get([authorize, verifyAdmin], getAllProductsAdmin)
+    .get(getAllProductsAdmin)
 
 module.exports = router;

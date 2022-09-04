@@ -44,7 +44,9 @@ module.exports.getReviews = async (req, res) => {
 
 module.exports.getReviewsAdmin = async (req, res) => {
     try {
-        let sql = `SELECT * FROM reviews WHERE ${req.body.searchTrm} = ?`;
+        let limit = 10
+        let offset = limit * req.params.page
+        let sql = `SELECT * FROM reviews WHERE ${req.body.searchTrm} = ? LIMIT ${limit} OFFSET ${offset}`;
         await query(sql, [req.body.value]).then(response => {
             return res.status(200).send({ response, status: 1 })
         }).catch(err => {

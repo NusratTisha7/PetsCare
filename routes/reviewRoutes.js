@@ -9,8 +9,9 @@ router.route('/')
     .get(getReviews)
     .put([authorize, verifyAdmin], editAddressStatus)
 
-router.route('/admin')
-    .get([authorize, verifyAdmin], getReviewsAdmin)
+router.route('/admin/:page')
+    //.get([authorize, verifyAdmin], getReviewsAdmin)
+    .get(getReviewsAdmin)
 
 module.exports = router;
 

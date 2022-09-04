@@ -15,7 +15,8 @@ router.route('/:id')
     .put([authorize, verifyAdmin], upload.single("photo"), editPet)
     .delete([authorize, verifyAdmin], deletePet)
 
-router.route('/admin/allpets')
-    .get([authorize, verifyAdmin], getAllPetsAdmin)
+router.route('/admin/allpets/:page')
+    //.get([authorize, verifyAdmin], getAllPetsAdmin)
+    .get(getAllPetsAdmin)
 
 module.exports = router;

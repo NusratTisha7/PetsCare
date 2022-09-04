@@ -37,7 +37,9 @@ module.exports.getAllPets = async (req, res) => {
 
 module.exports.getAllPetsAdmin = async (req, res) => {
     try {
-        let sql = "SELECT * FROM pet";
+        let limit = 10
+        let offset = limit * req.params.page
+        let sql = "SELECT * FROM pet LIMIT "+limit+" OFFSET "+offset+"";
         await query(sql).then(response => {
             return res.status(200).send({ response, status: 1 })
         }).catch(err => {
