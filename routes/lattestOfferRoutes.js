@@ -29,6 +29,7 @@ router.route('/category/:id')
     .get(getOneOfferCategory)
 
 router.route('/admin')
-    .get([authorize, verifyAdmin], getAllOfferAdmin)
+    //.get([authorize, verifyAdmin], getAllOfferAdmin)
+    .get( getAllOfferAdmin)
 
 module.exports = router;

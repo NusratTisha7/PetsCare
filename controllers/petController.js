@@ -37,9 +37,7 @@ module.exports.getAllPets = async (req, res) => {
 
 module.exports.getAllPetsAdmin = async (req, res) => {
     try {
-        let limit = 10
-        let offset = limit * req.params.page
-        let sql = "SELECT * FROM pet LIMIT "+limit+" OFFSET "+offset+"";
+        let sql = "SELECT * FROM pet";
         await query(sql).then(response => {
             return res.status(200).send({ response, status: 1 })
         }).catch(err => {
@@ -108,6 +106,37 @@ module.exports.editActiveStatus = async (req, res) => {
         }).catch(err => {
             return res.status(400).send({ status: 0, message: 'Something failed!' });
         })
+    } catch (err) {
+        return res.status(400).send({ status: 0, msg: err })
+    }
+}
+
+
+module.exports.searchPet = async (req, res) => {
+    try {
+        let serachTerm = req.body.serachTerm;
+        let sql = "SELECT * FROM pet WHERE name LIKE '%" + serachTerm + "%'"
+        await query(sql).then(response => {
+            return res.status(200).send({ response, status: 1 })
+        }).catch(err => {
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
+        })
+
+    } catch (err) {
+        return res.status(400).send({ status: 0, msg: err })
+    }
+}
+
+module.exports.sortByCategory = async (req, res) => {
+    try {
+        let categoryId = req.params.id
+        let sql = "SELECT * FROM pet WHERE petCategoryID = ?";
+        await query(sql, [categoryId]).then(response => {
+            return res.status(200).send({ response, status: 1 })
+        }).catch(err => {
+            return res.status(400).send({ status: 0, message: 'Something failed!' });
+        })
+
     } catch (err) {
         return res.status(400).send({ status: 0, msg: err })
     }

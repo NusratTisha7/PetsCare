@@ -38,7 +38,7 @@ module.exports.getAllProducts = async (req, res) => {
 
 module.exports.getAllProductsAdmin = async (req, res) => {
     try {
-        let limit = 2
+        let limit = 10
         let offset = limit * req.params.page
         let sql = "SELECT * FROM product LIMIT "+limit+" OFFSET "+offset+"";
         console.log(sql)
