@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { addReview, getReviewsAdmin, getReviews, editAddressStatus } = require('../controllers/reviewController')
+const { addReview, getReviewsAdmin, getReviews, editReviewStatus } = require('../controllers/reviewController')
 const authorize = require('../middlewares/authorize');
 const verifyAdmin = require('../middlewares/verifyAdmin');
 
@@ -7,11 +7,10 @@ const verifyAdmin = require('../middlewares/verifyAdmin');
 router.route('/')
     .post([authorize], addReview)
     .get(getReviews)
-    .put([authorize, verifyAdmin], editAddressStatus)
+    .put([authorize, verifyAdmin], editReviewStatus)
 
-router.route('/admin/:page')
-    //.get([authorize, verifyAdmin], getReviewsAdmin)
-    .get(getReviewsAdmin)
+router.route('/admin')
+    .get([authorize, verifyAdmin], getReviewsAdmin)
 
 module.exports = router;
 

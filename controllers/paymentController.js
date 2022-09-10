@@ -86,19 +86,32 @@ module.exports.product = async (req, res) => {
         totalAmount,
         numItem: cartItems.length
     }
-    initPayment(values, (response, tranId) => {
-        if (response.status === 'SUCCESS') {
-            let values = {
-                userId,
-                cartItems: cartItems,
-                sessionkey: response['sessionkey'],
-                tranId: tranId,
-                totalAmount
-            }
-            productOrder(values)
+    if (req.body.method === 'cashOn') {
+        let values = {
+            userId,
+            cartItems: cartItems,
+            tranId: Math.random().toString(36).substr(2, 9) + (new Date()).getTime(),
+            totalAmount,
+            cashOn: 1
         }
-        return res.status(200).send(response)
-    })
+        productOrder(values)
+        return res.status(200).send("order confirmed!")
+    } else {
+        initPayment(values, (response, tranId) => {
+            if (response.status === 'SUCCESS') {
+                let values = {
+                    userId,
+                    cartItems: cartItems,
+                    sessionkey: response['sessionkey'],
+                    tranId: tranId,
+                    totalAmount,
+                    cashOn: 0
+                }
+                productOrder(values)
+            }
+            return res.status(200).send(response)
+        })
+    }
 }
 
 module.exports.pet = async (req, res) => {
@@ -110,18 +123,30 @@ module.exports.pet = async (req, res) => {
         totalAmount,
         numItem: 1
     }
-    initPayment(values, (response, tranId) => {
-        if (response.status === 'SUCCESS') {
-            let values = {
-                userId,
-                body,
-                sessionkey: response['sessionkey'],
-                tranId: tranId
-            }
-            adaption(values)
+    if (req.body.method === 'cashOn') {
+        let values = {
+            userId,
+            body,
+            tranId: Math.random().toString(36).substr(2, 9) + (new Date()).getTime(),
+            cashOn: 1
         }
-        return res.status(200).send(response)
-    })
+        adaption(values)
+        return res.status(200).send("adaption confirmed!")
+    } else {
+        initPayment(values, (response, tranId) => {
+            if (response.status === 'SUCCESS') {
+                let values = {
+                    userId,
+                    body,
+                    sessionkey: response['sessionkey'],
+                    tranId: tranId,
+                    cashOn: 0
+                }
+                adaption(values)
+            }
+            return res.status(200).send(response)
+        })
+    }
 }
 
 module.exports.treatment = async (req, res) => {
@@ -133,18 +158,31 @@ module.exports.treatment = async (req, res) => {
         totalAmount,
         numItem: 1
     }
-    initPayment(values, (response, tranId) => {
-        if (response.status === 'SUCCESS') {
-            let values = {
-                userId,
-                body,
-                sessionkey: response['sessionkey'],
-                tranId: tranId
-            }
-            treatment(values)
+
+    if (req.body.method === 'cashOn') {
+        let values = {
+            userId,
+            body,
+            tranId: Math.random().toString(36).substr(2, 9) + (new Date()).getTime(),
+            cashOn: 1
         }
-        return res.status(200).send(response)
-    })
+        treatment(values)
+        return res.status(200).send("treatment confirmed!")
+    } else {
+        initPayment(values, (response, tranId) => {
+            if (response.status === 'SUCCESS') {
+                let values = {
+                    userId,
+                    body,
+                    sessionkey: response['sessionkey'],
+                    tranId: tranId,
+                    cashOn: 0
+                }
+                treatment(values)
+            }
+            return res.status(200).send(response)
+        })
+    }
 }
 
 
@@ -157,18 +195,31 @@ module.exports.hotel = async (req, res) => {
         totalAmount,
         numItem: 1
     }
-    initPayment(values, (response, tranId) => {
-        if (response.status === 'SUCCESS') {
-            let values = {
-                userId,
-                body,
-                sessionkey: response['sessionkey'],
-                tranId: tranId
-            }
-            hotel(values)
+
+    if (req.body.method === 'cashOn') {
+        let values = {
+            userId,
+            body,
+            tranId: Math.random().toString(36).substr(2, 9) + (new Date()).getTime(),
+            cashOn: 1
         }
-        return res.status(200).send(response)
-    })
+        hotel(values)
+        return res.status(200).send("hotel booked!")
+    } else {
+        initPayment(values, (response, tranId) => {
+            if (response.status === 'SUCCESS') {
+                let values = {
+                    userId,
+                    body,
+                    sessionkey: response['sessionkey'],
+                    tranId: tranId,
+                    cashOn: 0
+                }
+                hotel(values)
+            }
+            return res.status(200).send(response)
+        })
+    }
 }
 
 

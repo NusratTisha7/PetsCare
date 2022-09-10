@@ -9,8 +9,7 @@ router.route('/')
     .put([authorize, verifyAdmin], editActiveStatus)
 
 router.route('/admin')
-    //.get([authorize, verifyAdmin], getAllBrandItemAdmin)
-    .get(getAllBrandItemAdmin)
+    .get([authorize, verifyAdmin], getAllBrandItemAdmin)
     
 router.route('/:id')
     .put([authorize, verifyAdmin], editBrand)

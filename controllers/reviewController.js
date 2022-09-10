@@ -14,7 +14,7 @@ module.exports.addReview = async (req, res) => {
         let sql = "CREATE TABLE IF NOT EXISTS reviews (id INT AUTO_INCREMENT PRIMARY KEY, rating int, review TEXT, productID int, profileID int, FOREIGN KEY (productID) REFERENCES product(id),FOREIGN KEY (profileID) REFERENCES profile(id),petID int ,FOREIGN KEY (petID) REFERENCES pet(id),type VARCHAR(255),isActive BOOLEAN)";
         await query(sql).then(async response => {
             let sql = "INSERT INTO reviews (rating, review, productID, petID,profileID,type,isActive) VALUES ?";
-            let values = [[rating, review, productID, petID, profileID, type,1]]
+            let values = [[rating, review, productID, petID, profileID, type, 1]]
             await query(sql, [values]).then(response => {
                 return res.status(200).send({ status: 1, message: 'Review Added successfully' })
             }).catch(err => {
@@ -44,9 +44,7 @@ module.exports.getReviews = async (req, res) => {
 
 module.exports.getReviewsAdmin = async (req, res) => {
     try {
-        let limit = 10
-        let offset = limit * req.params.page
-        let sql = `SELECT * FROM reviews WHERE ${req.body.searchTrm} = ? LIMIT ${limit} OFFSET ${offset}`;
+        let sql = `SELECT r.id, r.rating, r.review,r.isActive, p.email FROM reviews r INNER JOIN profile p ON r.profileID=p.profileID WHERE ${req.body.searchTrm} = ?`
         await query(sql, [req.body.value]).then(response => {
             return res.status(200).send({ response, status: 1 })
         }).catch(err => {
@@ -57,10 +55,11 @@ module.exports.getReviewsAdmin = async (req, res) => {
     }
 }
 
-module.exports.editAddressStatus = async (req, res) => {
+module.exports.editReviewStatus = async (req, res) => {
     try {
-        let { activeStatus,id } = req.body
-        let sql = "UPDATE reviews SET isActive = " + activeStatus + " WHERE id = "+id+"";
+        let { activeStatus, id } = req.body
+        console.log(req.body)
+        let sql = "UPDATE reviews SET isActive = " + activeStatus + " WHERE id = " + id + "";
         await query(sql).then(response => {
             return res.status(200).send({ status: 1, message: 'Successfully updated' })
         }).catch(err => {

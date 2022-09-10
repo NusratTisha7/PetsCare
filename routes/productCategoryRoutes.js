@@ -14,7 +14,6 @@ router.route('/:id')
     .delete([authorize, verifyAdmin], deleteProductCategory)
 
 router.route('/admin')
-    //.get([authorize, verifyAdmin], getAllForAdmin)
-    .get(getAllForAdmin)
+    .get([authorize, verifyAdmin], getAllForAdmin)
 
 module.exports = router;

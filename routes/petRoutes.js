@@ -16,8 +16,7 @@ router.route('/:id')
     .delete([authorize, verifyAdmin], deletePet)
 
 router.route('/admin/allpets')
-    //.get([authorize, verifyAdmin], getAllPetsAdmin)
-    .get(getAllPetsAdmin)
+    .get([authorize, verifyAdmin], getAllPetsAdmin)
 
 router.route('/search-by-category/:id')
     .get(sortByCategory)
