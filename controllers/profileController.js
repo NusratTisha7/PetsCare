@@ -3,7 +3,7 @@ const query = require('../config/db')
 module.exports.createProfile = async (values) => {
     let { registrationID, email, phone, address } = values
     let firstName, lastName, gender, profileImage = null
-    let sql = "CREATE TABLE IF NOT EXISTS profile (id INT AUTO_INCREMENT PRIMARY KEY, email VARCHAR(255), phone VARCHAR(255), address VARCHAR(255), firstName VARCHAR(255), lastName VARCHAR(255), gender VARCHAR(255), profileImage VARCHAR(255),registrationID int ,FOREIGN KEY (registrationID) REFERENCES user(id), isActive BOOLEAN)";
+    let sql = "CREATE TABLE IF NOT EXISTS profile (profileID INT AUTO_INCREMENT PRIMARY KEY, email VARCHAR(255), phone VARCHAR(255), address VARCHAR(255), firstName VARCHAR(255), lastName VARCHAR(255), gender VARCHAR(255), profileImage VARCHAR(255),registrationID int ,FOREIGN KEY (registrationID) REFERENCES user(id), isActive BOOLEAN)";
     await query(sql).then(response => {
         let sql = "INSERT INTO profile (email, phone, address, firstName,lastName,gender,profileImage,registrationID,isActive) VALUES ?";
         let values = [[email, phone, address, firstName, lastName, gender, profileImage, registrationID,1]]

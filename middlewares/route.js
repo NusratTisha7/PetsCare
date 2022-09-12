@@ -11,7 +11,7 @@ const profileRoutes = require('../routes/profileRoutes');
 const paymentRoutes = require('../routes/paymentRoutes');
 const bestSellerRoutes = require('../routes/bestSellerRoutes');
 const hotelBookHotelRoutes = require('../routes/hotelBookHotelRoutes');
-
+const getOrders = require('../routes/getOrderRoute')
 
 module.exports = (app) => {
     app.use('/api/user', userRoutes);
@@ -27,4 +27,5 @@ module.exports = (app) => {
     app.use('/api/payment', paymentRoutes);
     app.use('/api/best_seller', bestSellerRoutes);
     app.use('/api/hotel_book', hotelBookHotelRoutes);
+    app.use('/api/order/get', getOrders);
 }

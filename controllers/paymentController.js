@@ -24,10 +24,10 @@ const initPayment = async (values, callBack) => {
         process.env.SSLCOMMERZ_STORE_PASSWORD
     );
     payment.setUrls({
-        success: "https://nodeapi.sajidur.com/api/payment/success",
-        fail: "https://nodeapi.sajidur.com/api/payment/failure",
-        cancel: "https://nodeapi.sajidur.com/api/payment/cancel",
-        ipn: "https://nodeapi.sajidur.com/api/payment/ipn",
+        success: "https://petcareapi.sajidurapp.xyz/api/payment/success",
+        fail: "https://petcareapi.sajidurapp.xyz/api/payment/failure",
+        cancel: "https://petcareapi.sajidurapp.xyz/api/payment/cancel",
+        ipn: "https://petcareapi.sajidurapp.xyz/api/payment/ipn",
     });
     payment.setOrderInfo({
         total_amount: totalAmount,
