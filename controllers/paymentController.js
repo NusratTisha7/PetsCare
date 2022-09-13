@@ -94,11 +94,18 @@ module.exports.product = async (req, res) => {
             totalAmount,
             cashOn: 1
         }
-        productOrder(values)
-        return res.status(200).send("order confirmed!")
+       // productOrder(values)
+        productOrder(values, async (err, result) => {
+            if(result){
+                return res.status(200).send({ status: 1, message: 'Order created Successfully' })  
+            }else if(err){
+                return res.status(400).send({ status: 0, message: err });
+            }
+        })
+       
     } else {
         initPayment(values, (response, tranId) => {
-            if (response.status === 'SUCCESS') {
+            //if (response.status === 'SUCCESS') {
                 let values = {
                     userId,
                     cartItems: cartItems,
@@ -107,9 +114,14 @@ module.exports.product = async (req, res) => {
                     totalAmount,
                     cashOn: 0
                 }
-                productOrder(values)
-            }
-            return res.status(200).send(response)
+                productOrder(values, async (err, result) => {
+                    if(result){
+                        return res.status(200).send({ status: 1, message: 'Order created Successfully' })  
+                    }else if(err){
+                        return res.status(400).send({ status: 0, message: err });
+                    }
+                })
+           // }
         })
     }
 }

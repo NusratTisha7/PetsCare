@@ -1,6 +1,6 @@
 const query = require('../config/db')
 
-module.exports.productOrder = async (values) => {
+module.exports.productOrder = async (values,callBack) => {
     let cartItem = JSON.stringify(values.cartItems);
     let { tranId, sessionkey, totalAmount, userId, cashOn } = values
     let sql = "CREATE TABLE IF NOT EXISTS orders (id INT AUTO_INCREMENT PRIMARY KEY, cartItem VARCHAR(255), transactionID  VARCHAR(255), sessionkey VARCHAR(255),userID int, FOREIGN KEY (userID) REFERENCES user(id),totalAmount int, paymentStatus VARCHAR(255), valId VARCHAR(255), isActive BOOLEAN,cashOn BOOLEAN)";
@@ -10,9 +10,9 @@ module.exports.productOrder = async (values) => {
         await query(sql, [values]).then(async res => {
             let sql = "DELETE FROM cart WHERE userID = ?"
             await query(sql, [userId]).then(response => {
-                return res.status(200).send({ status: 1, message: 'Successfully deleted' })
+                callBack(null,response)
             }).catch(err => {
-                return res.status(400).send({ status: 0, message: 'Something failed!' });
+                callBack(err)
             })
         }).catch(err => console.log(err))
     }).catch(err => {
