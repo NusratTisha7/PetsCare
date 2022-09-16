@@ -8,8 +8,7 @@ const path = require('path');
 
 
 const initPayment = async (values, callBack) => {
-    let { userId, totalAmount, numItem } = values
-    const tranId = Math.random().toString(36).substr(2, 9) + (new Date()).getTime();
+    let { userId, totalAmount, numItem,tranId } = values
     //get profile
     let profileSql = "SELECT * FROM profile WHERE registrationID = ?";
     var profile = {}
@@ -65,12 +64,13 @@ const initPayment = async (values, callBack) => {
         product_profile: "general",
     });
     let response = await payment.paymentInit();
-    callBack(response, tranId)
+    callBack(response)
 }
 
 
 module.exports.product = async (req, res) => {
     const userId = req.user.result.id;
+    const tranId = Math.random().toString(36).substr(2, 9) + (new Date()).getTime();
     //get cart
     let cartSql = "SELECT * FROM cart WHERE userID = ?";
     var cartItems = []
@@ -84,15 +84,16 @@ module.exports.product = async (req, res) => {
     let values = {
         userId,
         totalAmount,
-        numItem: cartItems.length
+        numItem: cartItems.length,
+        tranId: tranId,
     }
     if (req.body.method === 'cashOn') {
         let values = {
             userId,
             cartItems: cartItems,
-            tranId: Math.random().toString(36).substr(2, 9) + (new Date()).getTime(),
+            tranId:tranId,
             totalAmount,
-            cashOn: 1
+            cashOn: 1,
         }
        // productOrder(values)
         productOrder(values, async (err, result) => {
@@ -104,48 +105,51 @@ module.exports.product = async (req, res) => {
         })
        
     } else {
-        initPayment(values, (response, tranId) => {
-            //if (response.status === 'SUCCESS') {
+        initPayment(values, (response) => {
+            if (response.status === 'SUCCESS') {
                 let values = {
                     userId,
                     cartItems: cartItems,
                     sessionkey: response['sessionkey'],
                     tranId: tranId,
                     totalAmount,
-                    cashOn: 0
+                    cashOn: 0,
+                    paymentStatus:'SUCCESS'
                 }
                 productOrder(values, async (err, result) => {
                     if(result){
-                        return res.status(200).send({ status: 1, message: 'Order created Successfully' })  
+                        return res.status(200).send(response)  
                     }else if(err){
                         return res.status(400).send({ status: 0, message: err });
                     }
                 })
-           // }
+            }
         })
     }
 }
 
 module.exports.pet = async (req, res) => {
     const userId = req.user.result.id;
+    const tranId = Math.random().toString(36).substr(2, 9) + (new Date()).getTime();
     let { totalAmount } = req.body
     let body = req.body
     let values = {
         userId,
         totalAmount,
-        numItem: 1
+        numItem: 1,
+        tranId: tranId,
     }
     if (req.body.method === 'cashOn') {
         let values = {
             userId,
             body,
-            tranId: Math.random().toString(36).substr(2, 9) + (new Date()).getTime(),
+            tranId: tranId,
             cashOn: 1
         }
         adaption(values)
         return res.status(200).send("adaption confirmed!")
     } else {
-        initPayment(values, (response, tranId) => {
+        initPayment(values, (response) => {
             if (response.status === 'SUCCESS') {
                 let values = {
                     userId,
@@ -163,25 +167,28 @@ module.exports.pet = async (req, res) => {
 
 module.exports.treatment = async (req, res) => {
     const userId = req.user.result.id;
+    const tranId = Math.random().toString(36).substr(2, 9) + (new Date()).getTime();
+
     let { totalAmount } = req.body
     let body = req.body
     let values = {
         userId,
         totalAmount,
-        numItem: 1
+        numItem: 1,
+        tranId: tranId,
     }
 
     if (req.body.method === 'cashOn') {
         let values = {
             userId,
             body,
-            tranId: Math.random().toString(36).substr(2, 9) + (new Date()).getTime(),
+            tranId: tranId,
             cashOn: 1
         }
         treatment(values)
         return res.status(200).send("treatment confirmed!")
     } else {
-        initPayment(values, (response, tranId) => {
+        initPayment(values, (response) => {
             if (response.status === 'SUCCESS') {
                 let values = {
                     userId,
@@ -200,25 +207,28 @@ module.exports.treatment = async (req, res) => {
 
 module.exports.hotel = async (req, res) => {
     const userId = req.user.result.id;
+    const tranId = Math.random().toString(36).substr(2, 9) + (new Date()).getTime();
+
     let { totalAmount } = req.body
     let body = req.body
     let values = {
         userId,
         totalAmount,
-        numItem: 1
+        numItem: 1,
+        tranId: tranId,
     }
 
     if (req.body.method === 'cashOn') {
         let values = {
             userId,
             body,
-            tranId: Math.random().toString(36).substr(2, 9) + (new Date()).getTime(),
+            tranId: tranId,
             cashOn: 1
         }
         hotel(values)
         return res.status(200).send("hotel booked!")
     } else {
-        initPayment(values, (response, tranId) => {
+        initPayment(values, (response) => {
             if (response.status === 'SUCCESS') {
                 let values = {
                     userId,
@@ -233,7 +243,6 @@ module.exports.hotel = async (req, res) => {
         })
     }
 }
-
 
 
 const checktable = async (transaction_id, callBack) => {
@@ -272,6 +281,7 @@ const checktable = async (transaction_id, callBack) => {
 
 module.exports.ipn = async (req, res) => {
     try {
+        console.log()
         let transaction_id = req.body.tran_id
         checktable(transaction_id, async (err, result) => {
             if (err) return res.status(400).send({ status: 0, message: 'Something failed!' });

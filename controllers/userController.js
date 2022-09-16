@@ -125,7 +125,7 @@ module.exports.signIn = async (req, res) => {
                     const chekPass = await bcrypt.compare(password, result[0].password);
                     if (chekPass) {
                         const jsontoken = sign({ result: result[0] }, process.env.JWT_SECRET_KEY, {
-                            expiresIn: "1h"
+                            expiresIn: "48h"
                         });
                         return res.status(200).send({
                             message: 'Login Succssful!',

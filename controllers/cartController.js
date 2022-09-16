@@ -4,9 +4,15 @@ module.exports.addCartItem = async (req, res) => {
     try {
         let { userID, productID, count } = req.body
         let price;
-        let getPriceSql = "SELECT * FROM product WHERE id = ?";
+        let getPriceSql = "SELECT price,discount FROM product WHERE id = ?";
         let [result] = await query(getPriceSql, [productID])
-        price = result.price
+        if(result.discount!==0){
+            let discount = ((result.price)*(result.discount))/100
+            price = result.price-discount
+        }else{
+            price=result.price
+        }
+       
         if (price) {
             let sql = "CREATE TABLE IF NOT EXISTS cart (id INT AUTO_INCREMENT PRIMARY KEY, price int, count int, userID int, FOREIGN KEY (userID) REFERENCES user(id),productID int, FOREIGN KEY (productID) REFERENCES product(id),isActive BOOLEAN)";
             await query(sql).then(async response => {

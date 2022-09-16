@@ -3,7 +3,7 @@ const { product, pet, treatment, hotel, ipn, paymentSuccess, paymentCancel, paym
 const authorize = require('../middlewares/authorize');
 
 router.route('/product')
-    .get([authorize], product);
+    .post([authorize], product);
 
 router.route('/pet')
     .post([authorize], pet);
