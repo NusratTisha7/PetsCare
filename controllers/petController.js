@@ -3,11 +3,11 @@ const query = require('../config/db')
 module.exports.addNewPet = async (req, res) => {
     try {
         let createdBy = req.user.result.id
-        let { name, types, breed, birthDate, gender, weight, description } = req.body
-        let sql = "CREATE TABLE IF NOT EXISTS pet (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), petCategoryID int, FOREIGN KEY (petCategoryID) REFERENCES pet_category(id), breed VARCHAR(255), birthDate VARCHAR(255),gender VARCHAR(255),weight VARCHAR(255),description TEXT, petImage VARCHAR(255),createdBy int ,FOREIGN KEY (createdBy) REFERENCES user(id),isActive BOOLEAN)";
+        let { name, types, breed, birthDate, gender, weight, description,discount,price } = req.body
+        let sql = "CREATE TABLE IF NOT EXISTS pet (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), petCategoryID int, FOREIGN KEY (petCategoryID) REFERENCES pet_category(id), breed VARCHAR(255), birthDate VARCHAR(255),gender VARCHAR(255),weight VARCHAR(255),description TEXT, petImage VARCHAR(255),createdBy int ,FOREIGN KEY (createdBy) REFERENCES user(id),isActive BOOLEAN,discount int,price int)";
         await query(sql).then(async response => {
-            let sql = "INSERT INTO pet (name,petCategoryID,breed,birthDate,gender,weight,description,petImage,createdBy,isActive) VALUES ?";
-            let values = [[name, types, breed, birthDate, gender, weight, description, `${req.file.filename}`, createdBy,1]]
+            let sql = "INSERT INTO pet (name,petCategoryID,breed,birthDate,gender,weight,description,petImage,createdBy,isActive,discount,price) VALUES ?";
+            let values = [[name, types, breed, birthDate, gender, weight, description, `${req.file.filename}`, createdBy,1,discount,price]]
             await query(sql, [values]).then(response => {
                 return res.status(200).send({ status: 1, message: 'New pet added successfully' })
             }).catch(err => {

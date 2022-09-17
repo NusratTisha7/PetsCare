@@ -8,7 +8,7 @@ const path = require('path');
 
 
 const initPayment = async (values, callBack) => {
-    let { userId, totalAmount, numItem,tranId } = values
+    let { userId, totalAmount, numItem, tranId } = values
     //get profile
     let profileSql = "SELECT * FROM profile WHERE registrationID = ?";
     var profile = {}
@@ -26,7 +26,8 @@ const initPayment = async (values, callBack) => {
         success: "https://petcareapi.sajidurapp.xyz/api/payment/success",
         fail: "https://petcareapi.sajidurapp.xyz/api/payment/failure",
         cancel: "https://petcareapi.sajidurapp.xyz/api/payment/cancel",
-        ipn: "https://petcareapi.sajidurapp.xyz/api/payment/ipn",
+        //ipn: "https://petcareapi.sajidurapp.xyz/api/payment/ipn",
+        ipn: "https://petscare1234.herokuapp.com/api/payment/ipn",
     });
     payment.setOrderInfo({
         total_amount: totalAmount,
@@ -70,9 +71,9 @@ const initPayment = async (values, callBack) => {
 
 module.exports.product = async (req, res) => {
     const userId = req.user.result.id;
+    const address = req.body.address;
     const tranId = Math.random().toString(36).substr(2, 9) + (new Date()).getTime();
-    //get cart
-    let cartSql = "SELECT * FROM cart WHERE userID = ?";
+    let cartSql = "SELECT * FROM cart INNER JOIN product ON cart.productID=product.id INNER JOIN user ON cart.userID=user.id WHERE userID = ?"
     var cartItems = []
     await query(cartSql, [userId]).then(response => {
         cartItems = response
@@ -91,19 +92,19 @@ module.exports.product = async (req, res) => {
         let values = {
             userId,
             cartItems: cartItems,
-            tranId:tranId,
+            tranId: tranId,
             totalAmount,
             cashOn: 1,
+            address
         }
-       // productOrder(values)
         productOrder(values, async (err, result) => {
-            if(result){
-                return res.status(200).send({ status: 1, message: 'Order created Successfully' })  
-            }else if(err){
+            if (result) {
+                return res.status(200).send({ status: 1, message: 'Order created Successfully' })
+            } else if (err) {
                 return res.status(400).send({ status: 0, message: err });
             }
         })
-       
+
     } else {
         initPayment(values, (response) => {
             if (response.status === 'SUCCESS') {
@@ -114,15 +115,17 @@ module.exports.product = async (req, res) => {
                     tranId: tranId,
                     totalAmount,
                     cashOn: 0,
-                    paymentStatus:'SUCCESS'
+                    address
                 }
                 productOrder(values, async (err, result) => {
-                    if(result){
-                        return res.status(200).send(response)  
-                    }else if(err){
-                        return res.status(400).send({ status: 0, message: err });
+                    if (result) {
+                        return res.status(200).send(response)
+                    } else if (err) {
+                        return res.status(400).send({ status: 0, message: 'Something Wrong!' });
                     }
                 })
+            } else {
+                return res.status(400).send({ status: 0, message: 'Something Wrong!' });
             }
         })
     }
@@ -131,8 +134,26 @@ module.exports.product = async (req, res) => {
 module.exports.pet = async (req, res) => {
     const userId = req.user.result.id;
     const tranId = Math.random().toString(36).substr(2, 9) + (new Date()).getTime();
-    let { totalAmount } = req.body
+    let { petId } = req.body
+    let petSql = "SELECT * FROM pet WHERE id = ?"
+    var pet = []
+    await query(petSql, [petId]).then(response => {
+        pet = response
+    }).catch(err => {
+        return res.status(400).send(err);
+    })
+
+    let price = pet[0].price
+    let discount = pet[0].discount
+    let totalAmount;
+
+    if (discount !== 0) {
+        totalAmount = (price - (((price) * (discount)) / 100))
+    } else {
+        totalAmount = pet[0].price
+    }
     let body = req.body
+
     let values = {
         userId,
         totalAmount,
@@ -144,11 +165,19 @@ module.exports.pet = async (req, res) => {
             userId,
             body,
             tranId: tranId,
-            cashOn: 1
+            cashOn: 1,
+            pet,
+            totalAmount
         }
-        adaption(values)
-        return res.status(200).send("adaption confirmed!")
-    } else {
+        adaption(values, async (err, result) => {
+            if (result) {
+                return res.status(200).send({ status: 1, message: 'Order created Successfully' })
+            } else if (err) {
+                return res.status(400).send({ status: 0, message: err });
+            }
+        })
+    }
+    else {
         initPayment(values, (response) => {
             if (response.status === 'SUCCESS') {
                 let values = {
@@ -156,11 +185,21 @@ module.exports.pet = async (req, res) => {
                     body,
                     sessionkey: response['sessionkey'],
                     tranId: tranId,
-                    cashOn: 0
+                    cashOn: 0,
+                    pet,
+                    totalAmount
                 }
-                adaption(values)
+                adaption(values, async (err, result) => {
+                    if (result) {
+                        return res.status(200).send(response)
+                    } else if (err) {
+                        return res.status(400).send({ status: 0, message: 'Something Wrong!' });
+                    }
+                })
+            } else {
+                return res.status(400).send({ status: 0, message: 'Something Wrong!' });
             }
-            return res.status(200).send(response)
+           
         })
     }
 }
@@ -169,8 +208,18 @@ module.exports.treatment = async (req, res) => {
     const userId = req.user.result.id;
     const tranId = Math.random().toString(36).substr(2, 9) + (new Date()).getTime();
 
-    let { totalAmount } = req.body
     let body = req.body
+    
+    let cost = req.body.cost
+    let discount = req.body.discount
+    let totalAmount;
+
+    if (discount !== 0) {
+        totalAmount = (cost - (((cost) * (discount)) / 100))
+    } else {
+        totalAmount = pet[0].cost
+    }
+
     let values = {
         userId,
         totalAmount,
@@ -183,11 +232,19 @@ module.exports.treatment = async (req, res) => {
             userId,
             body,
             tranId: tranId,
-            cashOn: 1
+            cashOn: 1,
+            totalAmount
         }
-        treatment(values)
-        return res.status(200).send("treatment confirmed!")
-    } else {
+        treatment(values, async (err, result) => {
+            if (result) {
+                return res.status(200).send({ status: 1, message: 'Order created Successfully' })
+            } else if (err) {
+                return res.status(400).send({ status: 0, message: err });
+            }
+        })
+       
+    } 
+    else {
         initPayment(values, (response) => {
             if (response.status === 'SUCCESS') {
                 let values = {
@@ -195,11 +252,19 @@ module.exports.treatment = async (req, res) => {
                     body,
                     sessionkey: response['sessionkey'],
                     tranId: tranId,
-                    cashOn: 0
+                    cashOn: 0,
+                    totalAmount
                 }
-                treatment(values)
+                treatment(values, async (err, result) => {
+                    if (result) {
+                        return res.status(200).send(response)
+                    } else if (err) {
+                        return res.status(400).send({ status: 0, message: 'Something Wrong!' });
+                    }
+                })
+            } else {
+                return res.status(400).send({ status: 0, message: 'Something Wrong!' });
             }
-            return res.status(200).send(response)
         })
     }
 }
@@ -209,8 +274,19 @@ module.exports.hotel = async (req, res) => {
     const userId = req.user.result.id;
     const tranId = Math.random().toString(36).substr(2, 9) + (new Date()).getTime();
 
-    let { totalAmount } = req.body
     let body = req.body
+
+    let cost = req.body.cost
+    let discount = req.body.discount
+    let totalAmount;
+
+    if (discount !== 0) {
+        totalAmount = (cost - (((cost) * (discount)) / 100))
+    } else {
+        totalAmount = pet[0].cost
+    }
+
+    
     let values = {
         userId,
         totalAmount,
@@ -223,11 +299,18 @@ module.exports.hotel = async (req, res) => {
             userId,
             body,
             tranId: tranId,
-            cashOn: 1
+            cashOn: 1,
+            totalAmount
         }
-        hotel(values)
-        return res.status(200).send("hotel booked!")
-    } else {
+        hotel(values, async (err, result) => {
+            if (result) {
+                return res.status(200).send({ status: 1, message: 'Order created Successfully' })
+            } else if (err) {
+                return res.status(400).send({ status: 0, message: err });
+            }
+        })
+    }
+     else {
         initPayment(values, (response) => {
             if (response.status === 'SUCCESS') {
                 let values = {
@@ -235,11 +318,19 @@ module.exports.hotel = async (req, res) => {
                     body,
                     sessionkey: response['sessionkey'],
                     tranId: tranId,
-                    cashOn: 0
+                    cashOn: 0,
+                    totalAmount
                 }
-                hotel(values)
+                hotel(values, async (err, result) => {
+                    if (result) {
+                        return res.status(200).send(response)
+                    } else if (err) {
+                        return res.status(400).send({ status: 0, message: 'Something Wrong!' });
+                    }
+                })
+            } else {
+                return res.status(400).send({ status: 0, message: 'Something Wrong!' });
             }
-            return res.status(200).send(response)
         })
     }
 }
@@ -281,27 +372,16 @@ const checktable = async (transaction_id, callBack) => {
 
 module.exports.ipn = async (req, res) => {
     try {
-        console.log()
         let transaction_id = req.body.tran_id
+        let status = req.body.status
         checktable(transaction_id, async (err, result) => {
             if (err) return res.status(400).send({ status: 0, message: 'Something failed!' });
             if (result) {
-                let status = req.body.payment['status']
                 let updateData = {
                     paymentStatus: status,
-                    validationId: req.body.val_id
                 }
                 let sql = "UPDATE " + result + " SET ? WHERE transactionID= ?";
-                query(sql, [updateData, transaction_id]).then(response => {
-                    if (status === "VALID") {
-                        return res.status(200).send({ status: 1, message: 'Payment has been valid' })
-                    } else if (status === "FAILED ") {
-                        return res.status(200).send({ status: 1, message: 'Payment has been failed' })
-                    } else if (status === "CANCELLED ") {
-                        return res.status(200).send({ status: 1, message: 'Payment has been canceled' })
-                    }
-
-                }).catch(err => {
+                query(sql, [updateData, transaction_id]).catch(err => {
                     return res.status(400).send(err);
                 })
             }
