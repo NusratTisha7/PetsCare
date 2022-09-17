@@ -26,8 +26,8 @@ const initPayment = async (values, callBack) => {
         success: "https://petcareapi.sajidurapp.xyz/api/payment/success",
         fail: "https://petcareapi.sajidurapp.xyz/api/payment/failure",
         cancel: "https://petcareapi.sajidurapp.xyz/api/payment/cancel",
-        ipn: "https://petcareapi.sajidurapp.xyz/api/payment/ipn",
-        //ipn: "https://petscare1234.herokuapp.com/api/payment/ipn",
+       // ipn: "https://petcareapi.sajidurapp.xyz/api/payment/ipn",
+        ipn: "https://petscare1234.herokuapp.com/api/payment/ipn",
     });
     payment.setOrderInfo({
         total_amount: totalAmount,
@@ -71,7 +71,17 @@ const initPayment = async (values, callBack) => {
 
 module.exports.product = async (req, res) => {
     const userId = req.user.result.id;
-    const address = req.body.address;
+    const addressId = req.body.addressId;
+
+    let addressSql = "SELECT * FROM address WHERE id = ?"
+    let address = []
+    await query(addressSql, [addressId]).then(response => {
+        address = response
+    }).catch(err => {
+        return res.status(400).send(err);
+    })
+
+    
     const tranId = Math.random().toString(36).substr(2, 9) + (new Date()).getTime();
     let cartSql = "SELECT * FROM cart INNER JOIN product ON cart.productID=product.id INNER JOIN user ON cart.userID=user.id WHERE userID = ?"
     var cartItems = []
@@ -134,6 +144,15 @@ module.exports.product = async (req, res) => {
 module.exports.pet = async (req, res) => {
     const userId = req.user.result.id;
     const tranId = Math.random().toString(36).substr(2, 9) + (new Date()).getTime();
+
+    let addressSql = "SELECT * FROM address WHERE id = ?"
+    let address = []
+    await query(addressSql, [req.body.addressId]).then(response => {
+        address = response
+    }).catch(err => {
+        return res.status(400).send(err);
+    })
+
     let { petId } = req.body
     let petSql = "SELECT * FROM pet WHERE id = ?"
     var pet = []
@@ -160,6 +179,7 @@ module.exports.pet = async (req, res) => {
         numItem: 1,
         tranId: tranId,
     }
+
     if (req.body.method === 'cashOn') {
         let values = {
             userId,
@@ -167,7 +187,8 @@ module.exports.pet = async (req, res) => {
             tranId: tranId,
             cashOn: 1,
             pet,
-            totalAmount
+            totalAmount,
+            address
         }
         adaption(values, async (err, result) => {
             if (result) {
@@ -187,7 +208,8 @@ module.exports.pet = async (req, res) => {
                     tranId: tranId,
                     cashOn: 0,
                     pet,
-                    totalAmount
+                    totalAmount,
+                    address
                 }
                 adaption(values, async (err, result) => {
                     if (result) {
@@ -209,6 +231,15 @@ module.exports.treatment = async (req, res) => {
     const tranId = Math.random().toString(36).substr(2, 9) + (new Date()).getTime();
 
     let body = req.body
+
+    let addressSql = "SELECT * FROM address WHERE id = ?"
+    let address = []
+    await query(addressSql, [req.body.addressId]).then(response => {
+        address = response
+    }).catch(err => {
+        return res.status(400).send(err);
+    })
+
     
     let cost = req.body.cost
     let discount = req.body.discount
@@ -233,7 +264,8 @@ module.exports.treatment = async (req, res) => {
             body,
             tranId: tranId,
             cashOn: 1,
-            totalAmount
+            totalAmount,
+            address
         }
         treatment(values, async (err, result) => {
             if (result) {
@@ -253,7 +285,8 @@ module.exports.treatment = async (req, res) => {
                     sessionkey: response['sessionkey'],
                     tranId: tranId,
                     cashOn: 0,
-                    totalAmount
+                    totalAmount,
+                    address
                 }
                 treatment(values, async (err, result) => {
                     if (result) {
@@ -286,7 +319,14 @@ module.exports.hotel = async (req, res) => {
         totalAmount = pet[0].cost
     }
 
-    
+    let addressSql = "SELECT * FROM address WHERE id = ?"
+    let address = []
+    await query(addressSql, [req.body.addressId]).then(response => {
+        address = response
+    }).catch(err => {
+        return res.status(400).send(err);
+    })
+
     let values = {
         userId,
         totalAmount,
@@ -300,7 +340,8 @@ module.exports.hotel = async (req, res) => {
             body,
             tranId: tranId,
             cashOn: 1,
-            totalAmount
+            totalAmount,
+            address
         }
         hotel(values, async (err, result) => {
             if (result) {
@@ -319,7 +360,8 @@ module.exports.hotel = async (req, res) => {
                     sessionkey: response['sessionkey'],
                     tranId: tranId,
                     cashOn: 0,
-                    totalAmount
+                    totalAmount,
+                    address
                 }
                 hotel(values, async (err, result) => {
                     if (result) {

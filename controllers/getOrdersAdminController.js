@@ -1,10 +1,11 @@
 const query = require('../config/db')
 
-module.exports.product = async (req, res) => {
+module.exports.productAdmin = async (req, res) => {
     try {
-        let userId = req.user.result.id
-        let sql = "SELECT * FROM orders WHERE userID = ?";
-        await query(sql, [userId]).then(response => {
+        let limit = 10
+        let offset = limit * req.params.page
+        let sql = "SELECT * FROM orders LIMIT "+limit+" OFFSET "+offset+"";
+        await query(sql).then(response => {
             return res.status(200).send({ response, status: 1 })
         }).catch(err => {
             return res.status(400).send({ status: 0, message: 'Something failed!' });
@@ -14,11 +15,12 @@ module.exports.product = async (req, res) => {
     }
 }
 
-module.exports.pet = async (req, res) => {
+module.exports.petAdmin = async (req, res) => {
     try {
-        let userId = req.user.result.id
-        let sql = "SELECT * FROM adoption WHERE userID = ?";
-        await query(sql, [userId]).then(response => {
+        let limit = 10
+        let offset = limit * req.params.page
+        let sql = "SELECT * FROM adoption LIMIT "+limit+" OFFSET "+offset+"";
+        await query(sql).then(response => {
             return res.status(200).send({ response, status: 1 })
         }).catch(err => {
             return res.status(400).send({ status: 0, message: 'Something failed!' });
@@ -28,11 +30,12 @@ module.exports.pet = async (req, res) => {
     }
 }
 
-module.exports.treatment = async (req, res) => {
+module.exports.treatmentAdmin = async (req, res) => {
     try {
-        let userId = req.user.result.id
-        let sql = "SELECT * FROM adoption WHERE userID = ?";
-        await query(sql, [userId]).then(response => {
+        let limit = 10
+        let offset = limit * req.params.page
+        let sql = "SELECT * FROM adoption LIMIT "+limit+" OFFSET "+offset+"";
+        await query(sql).then(response => {
             return res.status(200).send({ response, status: 1 })
         }).catch(err => {
             return res.status(400).send({ status: 0, message: 'Something failed!' });
@@ -42,11 +45,12 @@ module.exports.treatment = async (req, res) => {
     }
 }
 
-module.exports.hotel = async (req, res) => {
+module.exports.hotelAdmin = async (req, res) => {
     try {
-        let userId = req.user.result.id
-        let sql = "SELECT * FROM hotel WHERE userID = ?";
-        await query(sql, [userId]).then(response => {
+        let limit = 10
+        let offset = limit * req.params.page
+        let sql = "SELECT * FROM hotel LIMIT "+limit+" OFFSET "+offset+"";
+        await query(sql).then(response => {
             return res.status(200).send({ response, status: 1 })
         }).catch(err => {
             return res.status(400).send({ status: 0, message: 'Something failed!' });
@@ -55,5 +59,3 @@ module.exports.hotel = async (req, res) => {
         return res.status(400).send({ status: 0, msg: err })
     }
 }
-
-
