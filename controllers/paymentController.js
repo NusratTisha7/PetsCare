@@ -81,15 +81,25 @@ module.exports.product = async (req, res) => {
         return res.status(400).send(err);
     })
 
+    let userSql = "SELECT * FROM profile WHERE registrationID= ?"
+    let userData = []
+    await query(userSql, [userId]).then(response => {
+        userData = response
+    }).catch(err => {
+        return res.status(400).send(err);
+    })
+
     
     const tranId = Math.random().toString(36).substr(2, 9) + (new Date()).getTime();
-    let cartSql = "SELECT * FROM cart INNER JOIN product ON cart.productID=product.id INNER JOIN user ON cart.userID=user.id WHERE userID = ?"
+    let cartSql = "SELECT * FROM cart INNER JOIN product ON cart.productID=product.id"
     var cartItems = []
     await query(cartSql, [userId]).then(response => {
         cartItems = response
     }).catch(err => {
         return res.status(400).send(err);
     })
+
+
     const totalAmount = cartItems.map(item => item.count * item.price)
         .reduce((a, b) => a + b, 0)
     let values = {
@@ -100,7 +110,7 @@ module.exports.product = async (req, res) => {
     }
     if (req.body.method === 'cashOn') {
         let values = {
-            userId,
+            userData,
             cartItems: cartItems,
             tranId: tranId,
             totalAmount,
@@ -119,7 +129,7 @@ module.exports.product = async (req, res) => {
         initPayment(values, (response) => {
             if (response.status === 'SUCCESS') {
                 let values = {
-                    userId,
+                    userData,
                     cartItems: cartItems,
                     sessionkey: response['sessionkey'],
                     tranId: tranId,
@@ -153,6 +163,15 @@ module.exports.pet = async (req, res) => {
         return res.status(400).send(err);
     })
 
+    let userSql = "SELECT * FROM profile WHERE registrationID= ?"
+    let userData = []
+    await query(userSql, [userId]).then(response => {
+        userData = response
+    }).catch(err => {
+        return res.status(400).send(err);
+    })
+
+
     let { petId } = req.body
     let petSql = "SELECT * FROM pet WHERE id = ?"
     var pet = []
@@ -182,7 +201,7 @@ module.exports.pet = async (req, res) => {
 
     if (req.body.method === 'cashOn') {
         let values = {
-            userId,
+            userData,
             body,
             tranId: tranId,
             cashOn: 1,
@@ -202,7 +221,7 @@ module.exports.pet = async (req, res) => {
         initPayment(values, (response) => {
             if (response.status === 'SUCCESS') {
                 let values = {
-                    userId,
+                    userData,
                     body,
                     sessionkey: response['sessionkey'],
                     tranId: tranId,
@@ -240,6 +259,13 @@ module.exports.treatment = async (req, res) => {
         return res.status(400).send(err);
     })
 
+    let userSql = "SELECT * FROM profile WHERE registrationID= ?"
+    let userData = []
+    await query(userSql, [userId]).then(response => {
+        userData = response
+    }).catch(err => {
+        return res.status(400).send(err);
+    })
     
     let cost = req.body.cost
     let discount = req.body.discount
@@ -260,7 +286,7 @@ module.exports.treatment = async (req, res) => {
 
     if (req.body.method === 'cashOn') {
         let values = {
-            userId,
+            userData,
             body,
             tranId: tranId,
             cashOn: 1,
@@ -280,7 +306,7 @@ module.exports.treatment = async (req, res) => {
         initPayment(values, (response) => {
             if (response.status === 'SUCCESS') {
                 let values = {
-                    userId,
+                    userData,
                     body,
                     sessionkey: response['sessionkey'],
                     tranId: tranId,
@@ -327,6 +353,14 @@ module.exports.hotel = async (req, res) => {
         return res.status(400).send(err);
     })
 
+    let userSql = "SELECT * FROM profile WHERE registrationID= ?"
+    let userData = []
+    await query(userSql, [userId]).then(response => {
+        userData = response
+    }).catch(err => {
+        return res.status(400).send(err);
+    })
+
     let values = {
         userId,
         totalAmount,
@@ -336,7 +370,7 @@ module.exports.hotel = async (req, res) => {
 
     if (req.body.method === 'cashOn') {
         let values = {
-            userId,
+            userData,
             body,
             tranId: tranId,
             cashOn: 1,
@@ -355,7 +389,7 @@ module.exports.hotel = async (req, res) => {
         initPayment(values, (response) => {
             if (response.status === 'SUCCESS') {
                 let values = {
-                    userId,
+                    userData,
                     body,
                     sessionkey: response['sessionkey'],
                     tranId: tranId,
