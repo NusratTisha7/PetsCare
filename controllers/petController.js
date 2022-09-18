@@ -37,7 +37,7 @@ module.exports.getAllPets = async (req, res) => {
 
 module.exports.getAllPetsAdmin = async (req, res) => {
     try {
-        let sql = "SELECT * FROM pet";
+        let sql = "SELECT * FROM pet WHERE isActive=1 OR isActive=0";
         await query(sql).then(response => {
             return res.status(200).send({ response, status: 1 })
         }).catch(err => {

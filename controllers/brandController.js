@@ -36,7 +36,7 @@ module.exports.getAllBrandItem = async (req, res) => {
 
 module.exports.getAllBrandItemAdmin = async (req, res) => {
     try {
-        let sql = "SELECT * FROM brand";
+        let sql = "SELECT * FROM brand WHERE isActive=1 OR isActive=0";
         await query(sql).then(response => {
             return res.status(200).send({ response, status: 1 })
         }).catch(err => {

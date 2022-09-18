@@ -67,7 +67,7 @@ module.exports.getAllOffer = async (req, res) => {
 module.exports.getAllOfferAdmin = async (req, res) => {
     try {
         let productId = req.params.id
-        let sql = "SELECT * FROM latest_offer";
+        let sql = "SELECT * FROM latest_offer WHERE isActive=1 OR isActive=0";
         await query(sql, [productId]).then(response => {
             return res.status(200).send({ response, status: 1, })
         }).catch(err => {

@@ -26,8 +26,8 @@ const initPayment = async (values, callBack) => {
         success: "https://petcareapi.sajidurapp.xyz/api/payment/success",
         fail: "https://petcareapi.sajidurapp.xyz/api/payment/failure",
         cancel: "https://petcareapi.sajidurapp.xyz/api/payment/cancel",
-       // ipn: "https://petcareapi.sajidurapp.xyz/api/payment/ipn",
-        ipn: "https://petscare1234.herokuapp.com/api/payment/ipn",
+        ipn: "https://petcareapi.sajidurapp.xyz/api/payment/ipn",
+        //ipn: "https://petscare1234.herokuapp.com/api/payment/ipn",
     });
     payment.setOrderInfo({
         total_amount: totalAmount,

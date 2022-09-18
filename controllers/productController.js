@@ -40,7 +40,7 @@ module.exports.getAllProductsAdmin = async (req, res) => {
     try {
         let limit = 10
         let offset = limit * req.params.page
-        let sql = "SELECT * FROM product LIMIT "+limit+" OFFSET "+offset+"";
+        let sql = "SELECT * FROM product WHERE isActive=1 OR isActive=0 LIMIT "+limit+" OFFSET "+offset+" ";
         console.log(sql)
         await query(sql).then(response => {
             return res.status(200).send({ response, status: 1 })

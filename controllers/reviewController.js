@@ -44,11 +44,12 @@ module.exports.getReviews = async (req, res) => {
 
 module.exports.getReviewsAdmin = async (req, res) => {
     try {
-        let sql = `SELECT r.id, r.rating, r.review,r.isActive, p.email FROM reviews r INNER JOIN profile p ON r.profileID=p.profileID WHERE ${req.body.searchTrm} = ?`
-        await query(sql, [req.body.value]).then(response => {
+        let sql = `SELECT r.isActive, r.id, r.rating, r.review,r.isActive, p.email FROM reviews r INNER JOIN profile p ON r.profileID=p.id WHERE ${req.body.searchTrm} = ? AND r.isActive=1 OR r.isActive=0 `
+
+       await query(sql, [req.body.value]).then(response => {
             return res.status(200).send({ response, status: 1 })
         }).catch(err => {
-            return res.status(400).send({ status: 0, message: 'Something failed!' });
+            return res.status(400).send({ status: 0, message: err });
         })
     } catch (err) {
         return res.status(400).send({ status: 0, message: 'Something failed!' });

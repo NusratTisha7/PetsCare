@@ -4,7 +4,7 @@ module.exports.productAdmin = async (req, res) => {
     try {
         let limit = 10
         let offset = limit * req.params.page
-        let sql = "SELECT * FROM orders LIMIT "+limit+" OFFSET "+offset+"";
+        let sql = "SELECT * FROM orders WHERE isActive=1 OR isActive=0 LIMIT "+limit+" OFFSET "+offset+"";
         await query(sql).then(response => {
             return res.status(200).send({ response, status: 1 })
         }).catch(err => {
@@ -19,7 +19,7 @@ module.exports.petAdmin = async (req, res) => {
     try {
         let limit = 10
         let offset = limit * req.params.page
-        let sql = "SELECT * FROM adoption LIMIT "+limit+" OFFSET "+offset+"";
+        let sql = "SELECT * FROM adoption WHERE isActive=1 OR isActive=0 LIMIT "+limit+" OFFSET "+offset+"";
         await query(sql).then(response => {
             return res.status(200).send({ response, status: 1 })
         }).catch(err => {
@@ -34,7 +34,7 @@ module.exports.treatmentAdmin = async (req, res) => {
     try {
         let limit = 10
         let offset = limit * req.params.page
-        let sql = "SELECT * FROM adoption LIMIT "+limit+" OFFSET "+offset+"";
+        let sql = "SELECT * FROM treatment WHERE isActive=1 OR isActive=0 LIMIT "+limit+" OFFSET "+offset+"";
         await query(sql).then(response => {
             return res.status(200).send({ response, status: 1 })
         }).catch(err => {
@@ -49,7 +49,7 @@ module.exports.hotelAdmin = async (req, res) => {
     try {
         let limit = 10
         let offset = limit * req.params.page
-        let sql = "SELECT * FROM hotel LIMIT "+limit+" OFFSET "+offset+"";
+        let sql = "SELECT * FROM hotel WHERE isActive=1 OR isActive=0 LIMIT "+limit+" OFFSET "+offset+"";
         await query(sql).then(response => {
             return res.status(200).send({ response, status: 1 })
         }).catch(err => {

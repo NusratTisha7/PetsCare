@@ -42,7 +42,7 @@ module.exports.getBestSeller = async (req, res) => {
 
 module.exports.getBestSellerAdmin = async (req, res) => {
     let productID = req.params.id
-    let sql = "SELECT * FROM best_seller"
+    let sql = "SELECT * FROM best_seller WHERE isActive=1 OR isActive=0"
     await query(sql, [productID]).then(async response => {
         return res.status(200).send({ response })
     }).catch(err => {
